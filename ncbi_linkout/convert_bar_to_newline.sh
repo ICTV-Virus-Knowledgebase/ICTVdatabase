@@ -7,11 +7,13 @@
 #
 
 # parse args
-if [ -z "$1" ]; then 
-    SRC=$1; shift; DEST="ictv.ft"
-else 
+if [[ -z "$1" ]]; then 
     SRC="ncbi_linkout_msl37.ft.txt"
     DEST=$(basename $SRC .txt)
+    echo "SRC defaulting to $SRC"
+else 
+    SRC=$1; shift; DEST="ictv.ft"
+    echo "SRC=$SRC"
 fi
 
 echo " "
