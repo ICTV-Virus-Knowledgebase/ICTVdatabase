@@ -1,7 +1,7 @@
 Protocol
 
-1. Export linkout text from database
-    run SP [NCBI_linkout_ft_export] 37, '|'
+1. Export linkout text from database, for most recent MSL (NULL)
+    EXEC [NCBI_linkout_ft_export] NULL, '|'
 
 2. right click on grid, "save results as" TXT
     # download to
