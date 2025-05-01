@@ -13,11 +13,37 @@ Protocol
     # ictv_2015_ncbi_linkout.unix.ft: UTF-8 Unicode text
 3. cmd-line "ftp ftp-private.ncbi.nlm.nih.gov"
 4. login as "ictv" password ######### (see Keeper: "ICTV VIrus Knowledgebase/NCBI linkout for ICTV")
+    # one-liner
+    lftp ictv@ftp-private.ncbi.nlm.nih.gov/holdings -e "put ictv.ft; ls -ls ictv.ft; quit"
+
+    # by hand
+    lftp ftp-private.ncbi.nlm.nih.gov
         user ictv ######
 	cd holdings
 	put ictv_2015_ncbi_linkout.ft ictv.ft
 	quit
 6. done.
+
+=======================================================================================================
+MSL40/2024
+=======================================================================================================
+
+Now, instead of making the "rule" link back to an taxnode_id, I use
+ictv_id's.
+
+Looks like NCBI is > 1 release behind, so when I just used taxon names
+from the last 2 years, lots of recently renamed species were missing
+linkout.
+
+So, I’ve opened it up to all names, ever, instead of just this year
+and last year, and re-uploaded the file.
+
+However, I can NOT add the &taxon_name=XXX suffix, as that would
+trigger the disambiguation bug in the NCBI code I’m trying to avoid:
+old names become aliases on the taxon, and when there’s more than 1
+unique link back to ICTV for a taxon, then it triggers an NCBI
+disambiguation page, which gives 500 server crash.
+
 
 
 ------------------------------------------------------------------------------------------------------

@@ -10,6 +10,7 @@ GO
 
 
 
+
 CREATE procedure [dbo].[NCBI_linkout_ft_export]
  	 @msl int = NULL,
 	 @newline varchar(10) ='|'
@@ -139,14 +140,20 @@ union all
 		'linkid:   '+ rtrim(max(taxnode_id )) + @newline -- need "rownum!"
 		+ 'query:  '+name+' [name]' + @newline
 		+ 'base:  &base;' + @newline
-		+ 'rule:  '+ rtrim(max(ictv_id)) + @newline
+		+ 'rule:  '+ rtrim(max(ictv_id)) + 
+			-- for taxa in the current MSL, add the taxon_name=[name] suffix
+			--(case when max(msl_release_num) = @msl then '&taxon_name='+replace(name,' ','%20') else '' end) +
+			 @newline
 		+ 'name:  '+name + @newline
-		+'---------------------------------------------------------------' 
+		+'---------------------------------------------------------------'
+	--  declare @msl int; set @msl=40; declare @newline varchar(10); set @newline='|'; select msl=msl_release_num, taxnode_id, ictv_id, name  -- DEBUG 
 	from taxonomy_node_names taxa
-	where msl_release_num in (@msl, @msl-1) -- latest MSL
+	where msl_release_num is not null -- latest MSL
 	 -- skip internal nodes: virtual subfamilies, etc
 	and is_deleted = 0 and is_hidden=0 and is_obsolete=0
 	and name is not null and name <> 'Unassigned'
+	-- debug
+	-- and name in ('Avipoxvirus canarypox','Canarypox virus','Canary pox virus') -- debug
 	--and ictv_id=202214169 -- renamed 39/40
 	group by name 
 	--order by max(msl_release_num)
@@ -155,6 +162,6 @@ union all
 ) as src 
 order by  src.left_idx
 
-GO
 
+GO
 
