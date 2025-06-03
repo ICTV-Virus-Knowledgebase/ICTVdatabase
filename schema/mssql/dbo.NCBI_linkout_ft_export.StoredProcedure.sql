@@ -1,14 +1,12 @@
-
+USE [ICTVonline40]
 GO
 
-
+/****** Object:  StoredProcedure [dbo].[NCBI_linkout_ft_export]    Script Date: 6/3/2025 5:45:16 PM ******/
 SET ANSI_NULLS ON
 GO
 
 SET QUOTED_IDENTIFIER ON
 GO
-
-
 
 
 CREATE procedure [dbo].[NCBI_linkout_ft_export]
@@ -27,11 +25,6 @@ exec [NCBI_linkout_ft_export] 37, '|'
 DECLARE @nl varchar(10); SET @nl=char(13)+char(10)
 exec [NCBI_linkout_ft_export] NULL, @nl
 
---
--- CHANGE LOG
---
--- 20250429 CurtisH switch from taxnode_id to ictv_id for linking
---
 */
 
 -- debug DECLARES for args
@@ -42,8 +35,6 @@ DECLARE @LINKOUT_PROVIDER_ID varchar(10);
 
 -- constants for ICTV
 SET @LINKOUT_PROVIDER_ID = '7640'
--- ictv_id= support is still in test, not prod (2025.04.30)
---SET @URL = 'https://ictv.global/taxonomy/taxondetails?ictv_id='
 SET @URL = 'https://ictv.global/taxonomy/taxondetails?taxnode_id='
 
 -- get most recent MSL, if not specified in args
@@ -132,36 +123,27 @@ union all
 	-- use "left_idx" as a unique "row number" (arbitrary)
 	-- the taxon name is the key for the linkout
 	-- the ictv_id is the ID they return to us
-	--  declare @msl int; set @msl=40; declare @newline varchar(10); set @newline='|' -- DEBUG
 	select 
-		max(taxnode_id), 
+		max(left_idx), 
 		max(msl_release_num), 
 		 t=
-		'linkid:   '+ rtrim(max(taxnode_id )) + @newline -- need "rownum!"
+		'linkid:   '+ rtrim(max(taxnode_id)) + @newline -- need "rownum!"
 		+ 'query:  '+name+' [name]' + @newline
 		+ 'base:  &base;' + @newline
-		+ 'rule:  '+ rtrim(max(ictv_id)) + 
-			-- for taxa in the current MSL, add the taxon_name=[name] suffix
-			--(case when max(msl_release_num) = @msl then '&taxon_name='+replace(name,' ','%20') else '' end) +
-			 @newline
+		+ 'rule:  '+ rtrim(max(taxnode_id)) + @newline
 		+ 'name:  '+name + @newline
-		+'---------------------------------------------------------------'
-	--  declare @msl int; set @msl=40; declare @newline varchar(10); set @newline='|'; select msl=msl_release_num, taxnode_id, ictv_id, name  -- DEBUG 
+		+'---------------------------------------------------------------' 
 	from taxonomy_node_names taxa
-	where msl_release_num is not null -- latest MSL
+	where msl_release_num = @msl -- latest MSL
 	 -- skip internal nodes: virtual subfamilies, etc
 	and is_deleted = 0 and is_hidden=0 and is_obsolete=0
 	and name is not null and name <> 'Unassigned'
-	-- debug
-	-- and name in ('Avipoxvirus canarypox','Canarypox virus','Canary pox virus') -- debug
-	--and ictv_id=202214169 -- renamed 39/40
 	group by name 
-	--order by max(msl_release_num)
 
 
 ) as src 
 order by  src.left_idx
 
-
 GO
+
 
