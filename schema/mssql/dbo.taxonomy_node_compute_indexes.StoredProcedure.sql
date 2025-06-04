@@ -1,7 +1,7 @@
-
+USE [ICTVonline40]
 GO
 
-
+/****** Object:  StoredProcedure [dbo].[taxonomy_node_compute_indexes]    Script Date: 6/4/2025 3:20:59 PM ******/
 SET ANSI_NULLS ON
 GO
 
@@ -415,4 +415,5 @@ AS
 	-- build script to re-index all trees
 	--select 'exec taxonomy_node_compute_indexes '+rtrim(taxnode_id) from taxonomy_node where level_id =100
 GO
+
 

@@ -1,7 +1,7 @@
-
+USE [ICTVonline40]
 GO
 
-
+/****** Object:  StoredProcedure [dbo].[QC_module_virus_prop_tabs]    Script Date: 6/4/2025 7:02:55 PM ******/
 SET ANSI_NULLS ON
 GO
 
@@ -61,4 +61,5 @@ update [virus_prop] set
 from [virus_prop] where host like '%'+char(9)+'%'
 */
 GO
+
 

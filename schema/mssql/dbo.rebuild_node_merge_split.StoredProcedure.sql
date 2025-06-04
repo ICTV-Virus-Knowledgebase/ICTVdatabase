@@ -1,7 +1,7 @@
-
+USE [ICTVonline40]
 GO
 
-
+/****** Object:  StoredProcedure [dbo].[rebuild_node_merge_split]    Script Date: 6/3/2025 7:36:52 PM ******/
 SET ANSI_NULLS ON
 GO
 
@@ -112,4 +112,3 @@ AS
 	select 'TEST', * from taxonomy_node_merge_split 
 	where next_ictV_id =20093515
 GO
-

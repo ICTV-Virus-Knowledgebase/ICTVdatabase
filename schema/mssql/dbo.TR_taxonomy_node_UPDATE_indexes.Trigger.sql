@@ -1,7 +1,7 @@
-
+USE [ICTVonline40]
 GO
 
-
+/****** Object:  Trigger [dbo].[TR_taxonomy_node_UPDATE_indexes]    Script Date: 6/4/2025 7:21:03 PM ******/
 SET ANSI_NULLS ON
 GO
 
@@ -265,4 +265,5 @@ GO
 
 ALTER TABLE [dbo].[taxonomy_node] ENABLE TRIGGER [TR_taxonomy_node_UPDATE_indexes]
 GO
+
 

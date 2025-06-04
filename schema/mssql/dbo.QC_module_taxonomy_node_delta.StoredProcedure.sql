@@ -1,7 +1,7 @@
-
+USE [ICTVonline40]
 GO
 
-
+/****** Object:  StoredProcedure [dbo].[QC_module_taxonomy_node_delta]    Script Date: 6/4/2025 6:43:06 PM ******/
 SET ANSI_NULLS ON
 GO
 
@@ -9,7 +9,7 @@ SET QUOTED_IDENTIFIER ON
 GO
 
 
-ALTER procedure [dbo].[QC_module_taxonomy_node_delta]
+CREATE procedure [dbo].[QC_module_taxonomy_node_delta]
 	@filter varchar(1000) = 'ERROR%' 
 AS
 -- 
@@ -53,4 +53,5 @@ where src.qc_mesg like 'ERROR%'-- @filter
 order by msl desc, lineage, qc_mesg
 
 GO
+
 
