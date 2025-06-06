@@ -149,10 +149,22 @@ mariadb -D "$DBNAME" -vvv --show-warnings < sp.MSL_export_fast_create.sql
 mariadb -D "$DBNAME" -vvv --show-warnings < sp.MSL_export_official_create.sql
 mariadb -D "$DBNAME" -vvv --show-warnings < sp.QC_module_taxonomy_node_suffixes_create.sql
 mariadb -D "$DBNAME" -vvv --show-warnings < sp.QC_run_modules_create.sql
+mariadb -D "$DBNAME" -vvv --show-warnings < sp.QC_module_ictv_id_deltas_create.sql
+mariadb -D "$DBNAME" -vvv --show-warnings < sp.QC_module_taxonomy_node_delta_create.sql
+mariadb -D "$DBNAME" -vvv --show-warnings < sp.QC_module_taxonomy_node_hidden_nodes_create.sql
+mariadb -D "$DBNAME" -vvv --show-warnings < sp.QC_module_taxonomy_node_ictv_resurrection_create.sql
+mariadb -D "$DBNAME" -vvv --show-warnings < sp.QC_module_taxonomy_node_orphan_taxa_create.sql
+mariadb -D "$DBNAME" -vvv --show-warnings < sp.QC_module_virus_prop_tabs_create.sql
+mariadb -D "$DBNAME" -vvv --show-warnings < sp.QC_module_vmr_export_species_count_create.sql
 mariadb -D "$DBNAME" -vvv --show-warnings < sp.rebuild_delta_nodes_create.sql
 mariadb -D "$DBNAME" -vvv --show-warnings < sp.searchTaxonomy_create.sql
 mariadb -D "$DBNAME" -vvv --show-warnings < sp.sp_simplify_molecule_id_settings_create.sql
 mariadb -D "$DBNAME" -vvv --show-warnings < sp.species_isolates_update_sorts_create.sql
+mariadb -D "$DBNAME" -vvv --show-warnings < sp.NCBI_linkout_ft_export_create.sql
+
+# Triggers
+# Not yet created
+# mariadb -D "$DBNAME" -vvv --show-warnings < tr.TR_taxonomy_node_UPDATE_indexes.sql
 
 # Update SPs with errors that need to be checked:
 # mariadb -D "$DBNAME" -vvv --show-warnings < sp.taxonomy_node_compute_indexes_create.sql
