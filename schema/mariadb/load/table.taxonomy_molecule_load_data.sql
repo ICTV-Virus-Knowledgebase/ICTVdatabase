@@ -1,5 +1,5 @@
 -- taxonomy_molecule
-LOAD DATA LOCAL INFILE '../../../data//taxonomy_molecule.utf8.osx.txt'
+LOAD DATA LOCAL INFILE '../../../data//taxonomy_molecule.utf8.txt'
 INTO TABLE taxonomy_molecule
 FIELDS TERMINATED BY '\t'
 OPTIONALLY ENCLOSED BY '"'

@@ -1,5 +1,5 @@
 -- taxonomy_toc
-LOAD DATA LOCAL INFILE '../../../data//taxonomy_toc.utf8.osx.txt'
+LOAD DATA LOCAL INFILE '../../../data//taxonomy_toc.utf8.txt'
 INTO TABLE taxonomy_toc
 FIELDS TERMINATED BY '\t'
 OPTIONALLY ENCLOSED BY '"'

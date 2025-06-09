@@ -1,5 +1,5 @@
 -- taxonomy_level
-LOAD DATA LOCAL INFILE '../../../data//taxonomy_level.utf8.osx.txt'
+LOAD DATA LOCAL INFILE '../../../data//taxonomy_level.utf8.txt'
 INTO TABLE taxonomy_level
 FIELDS TERMINATED BY '\t'
 OPTIONALLY ENCLOSED BY '"'

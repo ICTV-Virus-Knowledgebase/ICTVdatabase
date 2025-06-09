@@ -1,5 +1,5 @@
 -- taxonomy_json_rank
-LOAD DATA LOCAL INFILE '../../../data//taxonomy_json_rank.utf8.osx.txt'
+LOAD DATA LOCAL INFILE '../../../data//taxonomy_json_rank.utf8.txt'
 INTO TABLE taxonomy_json_rank
 FIELDS TERMINATED BY '\t'
 OPTIONALLY ENCLOSED BY '"'

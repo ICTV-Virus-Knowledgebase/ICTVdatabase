@@ -1,5 +1,5 @@
 -- taxonomy_node
-LOAD DATA LOCAL INFILE '../../../data//taxonomy_node_mariadb_etl.utf8.osx.txt'
+LOAD DATA LOCAL INFILE '../../../data//taxonomy_node_mariadb_etl.utf8.txt'
 INTO TABLE taxonomy_node
 FIELDS TERMINATED BY '\t'
 OPTIONALLY ENCLOSED BY '"'

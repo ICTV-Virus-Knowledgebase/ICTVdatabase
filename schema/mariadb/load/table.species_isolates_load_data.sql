@@ -1,5 +1,5 @@
 -- load species_isolates data
-LOAD DATA LOCAL INFILE '../../../data//species_isolates.utf8.osx.txt'
+LOAD DATA LOCAL INFILE '../../../data//species_isolates.utf8.txt'
 INTO TABLE species_isolates
 FIELDS TERMINATED BY '\t'
 OPTIONALLY ENCLOSED BY '"'

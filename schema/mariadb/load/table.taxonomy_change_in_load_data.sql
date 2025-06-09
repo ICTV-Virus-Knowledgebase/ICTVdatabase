@@ -1,5 +1,5 @@
 -- taxonomy_change_in
-LOAD DATA LOCAL INFILE '../../../data//taxonomy_change_in.utf8.osx.txt'
+LOAD DATA LOCAL INFILE '../../../data//taxonomy_change_in.utf8.txt'
 INTO TABLE taxonomy_change_in
 FIELDS TERMINATED BY '\t'
 OPTIONALLY ENCLOSED BY '"'

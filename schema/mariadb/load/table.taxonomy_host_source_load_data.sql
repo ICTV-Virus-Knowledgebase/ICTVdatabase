@@ -1,5 +1,5 @@
 -- taxonomy_host_source
-LOAD DATA LOCAL INFILE '../../../data//taxonomy_host_source.utf8.osx.txt'
+LOAD DATA LOCAL INFILE '../../../data//taxonomy_host_source.utf8.txt'
 INTO TABLE taxonomy_host_source
 FIELDS TERMINATED BY '\t'
 OPTIONALLY ENCLOSED BY '"'

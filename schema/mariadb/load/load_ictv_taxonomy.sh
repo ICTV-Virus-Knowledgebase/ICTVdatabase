@@ -61,37 +61,37 @@ EOF
 # load data into the tables and call check_row_count to compare 
 # rows in data file with what got loaded into the table.
 mariadb -D "$DBNAME" -vvv --show-warnings < table.taxonomy_change_in_load_data.sql
-check_row_count taxonomy_change_in "../../../data/taxonomy_change_in.utf8.osx.txt"
+check_row_count taxonomy_change_in "../../../data/taxonomy_change_in.utf8.txt"
 
 mariadb -D "$DBNAME" -vvv --show-warnings < table.taxonomy_change_out_load_data.sql
-check_row_count taxonomy_change_out "../../../data/taxonomy_change_out.utf8.osx.txt"
+check_row_count taxonomy_change_out "../../../data/taxonomy_change_out.utf8.txt"
 
 mariadb -D "$DBNAME" -vvv --show-warnings < table.taxonomy_genome_coverage_load_data.sql
-check_row_count taxonomy_genome_coverage "../../../data/taxonomy_genome_coverage.utf8.osx.txt"
+check_row_count taxonomy_genome_coverage "../../../data/taxonomy_genome_coverage.utf8.txt"
 
 mariadb -D "$DBNAME" -vvv --show-warnings < table.taxonomy_host_source_load_data.sql
-check_row_count taxonomy_host_source "../../../data/taxonomy_host_source.utf8.osx.txt"
+check_row_count taxonomy_host_source "../../../data/taxonomy_host_source.utf8.txt"
 
 mariadb -D "$DBNAME" -vvv --show-warnings < table.taxonomy_level_load_data.sql
-check_row_count taxonomy_level "../../../data/taxonomy_level.utf8.osx.txt"
+check_row_count taxonomy_level "../../../data/taxonomy_level.utf8.txt"
 
 mariadb -D "$DBNAME" -vvv --show-warnings < table.taxonomy_molecule_load_data.sql
-check_row_count taxonomy_molecule "../../../data/taxonomy_molecule.utf8.osx.txt"
+check_row_count taxonomy_molecule "../../../data/taxonomy_molecule.utf8.txt"
 
 mariadb -D "$DBNAME" -vvv --show-warnings < table.taxonomy_toc_load_data.sql
-check_row_count taxonomy_toc "../../../data/taxonomy_toc.utf8.osx.txt"
+check_row_count taxonomy_toc "../../../data/taxonomy_toc.utf8.txt"
 
 mariadb -D "$DBNAME" -vvv --show-warnings < table.taxonomy_node_load_data.sql
-check_row_count taxonomy_node "../../../data/taxonomy_node_mariadb_etl.utf8.osx.txt"
+check_row_count taxonomy_node "../../../data/taxonomy_node_mariadb_etl.utf8.txt"
 
 mariadb -D "$DBNAME" -vvv --show-warnings < table.species_isolates_load_data.sql
-check_row_count species_isolates "../../../data/species_isolates.utf8.osx.txt"
+check_row_count species_isolates "../../../data/species_isolates.utf8.txt"
 
 mariadb -D "$DBNAME" -vvv --show-warnings < table.taxonomy_node_merge_split_load_data.sql
-check_row_count taxonomy_node_merge_split "../../../data/taxonomy_node_merge_split.utf8.osx.txt"
+check_row_count taxonomy_node_merge_split "../../../data/taxonomy_node_merge_split.utf8.txt"
 
 mariadb -D "$DBNAME" -vvv --show-warnings < table.taxonomy_node_delta_load_data.sql
-check_row_count taxonomy_node_delta "../../../data/taxonomy_node_delta.utf8.osx.txt"
+check_row_count taxonomy_node_delta "../../../data/taxonomy_node_delta.utf8.txt"
 
 # add views
 mariadb -D "$DBNAME" -vvv --show-warnings < view.taxonomy_node_names_create.sql

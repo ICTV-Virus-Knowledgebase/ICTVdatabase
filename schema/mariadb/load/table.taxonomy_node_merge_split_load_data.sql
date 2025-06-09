@@ -1,5 +1,5 @@
 -- taxonomy_node_merge_split
-LOAD DATA LOCAL INFILE '../../../data//taxonomy_node_merge_split.utf8.osx.txt'
+LOAD DATA LOCAL INFILE '../../../data//taxonomy_node_merge_split.utf8.txt'
 INTO TABLE taxonomy_node_merge_split
 FIELDS TERMINATED BY '\t'
 OPTIONALLY ENCLOSED BY '"'

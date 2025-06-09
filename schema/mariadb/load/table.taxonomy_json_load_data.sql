@@ -1,5 +1,5 @@
 -- taxonomy_json
-LOAD DATA LOCAL INFILE '../../../data//taxonomy_json.utf8.osx.txt'
+LOAD DATA LOCAL INFILE '../../../data//taxonomy_json.utf8.txt'
 INTO TABLE taxonomy_json
 FIELDS TERMINATED BY '\t'
 OPTIONALLY ENCLOSED BY '"'

@@ -1,5 +1,5 @@
 -- taxonomy_node_delta
-LOAD DATA LOCAL INFILE '../../../data//taxonomy_node_delta.utf8.osx.txt'
+LOAD DATA LOCAL INFILE '../../../data//taxonomy_node_delta.utf8.txt'
 INTO TABLE taxonomy_node_delta
 FIELDS TERMINATED BY '\t'
 OPTIONALLY ENCLOSED BY '"'
