@@ -175,7 +175,7 @@ CREATE TABLE `taxonomy_node` (
   `genome_coverage` VARCHAR(50),
   `host_source` VARCHAR(50),
   PRIMARY KEY (`taxnode_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 -- taxonomy_change_in
 -- CREATE TABLE `taxonomy_change_in` (

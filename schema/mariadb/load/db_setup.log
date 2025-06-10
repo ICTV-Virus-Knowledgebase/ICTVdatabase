@@ -9,13 +9,13 @@ Query OK, 0 rows affected (0.000 sec)
 DROP TABLE IF EXISTS `species_isolates`
 --------------
 
-Query OK, 0 rows affected (0.007 sec)
+Query OK, 0 rows affected (0.011 sec)
 
 --------------
 DROP TABLE IF EXISTS `taxonomy_change_in`
 --------------
 
-Query OK, 0 rows affected (0.007 sec)
+Query OK, 0 rows affected (0.006 sec)
 
 --------------
 DROP TABLE IF EXISTS `taxonomy_change_out`
@@ -27,43 +27,43 @@ Query OK, 0 rows affected (0.006 sec)
 DROP TABLE IF EXISTS `taxonomy_genome_coverage`
 --------------
 
-Query OK, 0 rows affected (0.007 sec)
+Query OK, 0 rows affected (0.006 sec)
 
 --------------
 DROP TABLE IF EXISTS `taxonomy_host_source`
 --------------
 
-Query OK, 0 rows affected (0.007 sec)
+Query OK, 0 rows affected (0.006 sec)
 
 --------------
 DROP TABLE IF EXISTS `taxonomy_json`
 --------------
 
-Query OK, 0 rows affected (0.006 sec)
+Query OK, 0 rows affected (0.007 sec)
 
 --------------
 DROP TABLE IF EXISTS `taxonomy_json_rank`
 --------------
 
-Query OK, 0 rows affected (0.006 sec)
+Query OK, 0 rows affected (0.007 sec)
 
 --------------
 DROP TABLE IF EXISTS `taxonomy_level`
 --------------
 
-Query OK, 0 rows affected (0.006 sec)
+Query OK, 0 rows affected (0.007 sec)
 
 --------------
 DROP TABLE IF EXISTS `taxonomy_molecule`
 --------------
 
-Query OK, 0 rows affected (0.006 sec)
+Query OK, 0 rows affected (0.007 sec)
 
 --------------
 DROP TABLE IF EXISTS `taxonomy_node`
 --------------
 
-Query OK, 0 rows affected (0.007 sec)
+Query OK, 0 rows affected (0.008 sec)
 
 --------------
 DROP TABLE IF EXISTS `taxonomy_node_delta`
@@ -81,7 +81,7 @@ Query OK, 0 rows affected (0.007 sec)
 DROP TABLE IF EXISTS `taxonomy_toc`
 --------------
 
-Query OK, 0 rows affected (0.006 sec)
+Query OK, 0 rows affected (0.007 sec)
 
 --------------
 DROP TABLE IF EXISTS `virus_prop`
@@ -102,10 +102,10 @@ CREATE TABLE `taxonomy_change_in` (
   `change` VARCHAR(10) NOT NULL,
   `notes` TEXT,
   PRIMARY KEY (`change`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE utf8mb4_unicode_ci
 --------------
 
-Query OK, 0 rows affected (0.010 sec)
+Query OK, 0 rows affected (0.014 sec)
 
 Bye
 --------------
@@ -113,7 +113,7 @@ CREATE TABLE `taxonomy_change_out` (
   `change` VARCHAR(10) NOT NULL,
   `notes` TEXT,
   PRIMARY KEY (`change`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE utf8mb4_unicode_ci
 --------------
 
 Query OK, 0 rows affected (0.009 sec)
@@ -125,7 +125,7 @@ CREATE TABLE `taxonomy_genome_coverage` (
   `name` VARCHAR(50),
   `priority` INT,
   PRIMARY KEY (`genome_coverage`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE utf8mb4_unicode_ci
 --------------
 
 Query OK, 0 rows affected (0.009 sec)
@@ -135,7 +135,7 @@ Bye
 CREATE TABLE `taxonomy_host_source` (
   `host_source` VARCHAR(50) NOT NULL,
   PRIMARY KEY (`host_source`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE utf8mb4_unicode_ci
 --------------
 
 Query OK, 0 rows affected (0.009 sec)
@@ -153,7 +153,7 @@ CREATE TABLE `taxonomy_level` (
   `suffix_viriform` VARCHAR(50),
   `notes` TEXT,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE utf8mb4_unicode_ci
 --------------
 
 Query OK, 0 rows affected (0.009 sec)
@@ -170,7 +170,7 @@ CREATE TABLE `taxonomy_molecule` (
   `left_idx` INT,
   `right_idx` INT,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE utf8mb4_unicode_ci
 --------------
 
 Query OK, 0 rows affected (0.009 sec)
@@ -183,10 +183,10 @@ CREATE TABLE `taxonomy_toc`(
     `comments` TEXT,
     UNIQUE INDEX `IX_taxonomy_toc_tree_id` (`tree_id`),
     UNIQUE INDEX `PK_taxonomy_toc` (`tree_id`, `msl_release_num`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE utf8mb4_unicode_ci
 --------------
 
-Query OK, 0 rows affected (0.011 sec)
+Query OK, 0 rows affected (0.012 sec)
 
 Bye
 --------------
@@ -220,10 +220,10 @@ CREATE TABLE `species_isolates` (
     END
   ) PERSISTENT,
   `notes` TEXT
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE utf8mb4_unicode_ci
 --------------
 
-Query OK, 0 rows affected (0.009 sec)
+Query OK, 0 rows affected (0.011 sec)
 
 Bye
 --------------
@@ -384,10 +384,10 @@ CREATE TABLE `taxonomy_node` (
   `genome_coverage` VARCHAR(50),
   `host_source` VARCHAR(50),
   PRIMARY KEY (`taxnode_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE utf8mb4_unicode_ci
 --------------
 
-Query OK, 0 rows affected (0.011 sec)
+Query OK, 0 rows affected (0.012 sec)
 
 Bye
 --------------
@@ -399,7 +399,7 @@ CREATE TABLE `taxonomy_node_merge_split`(
     `dist` INT NOT NULL,
     `rev_count` INT NOT NULL,
     PRIMARY KEY (`prev_ictv_id`, `next_ictv_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE utf8mb4_unicode_ci
 --------------
 
 Query OK, 0 rows affected (0.009 sec)
@@ -455,7 +455,7 @@ CREATE TABLE `taxonomy_node_delta`(
         IF(`is_promoted`=1, 'Promoted,', ''),
         IF(`is_demoted`=1, 'Demoted,', '')
     )) PERSISTENT
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE utf8mb4_unicode_ci
 --------------
 
 Query OK, 0 rows affected (0.009 sec)
@@ -471,7 +471,7 @@ CREATE TABLE `taxonomy_json_rank` (
   PRIMARY KEY (`id`),
   UNIQUE `UK_taxonomy_json_rank` (`level_id`, `tree_id`),
   UNIQUE `UK_taxonomy_json_rank_rank_tree` (`rank_index`, `tree_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE utf8mb4_unicode_ci
 --------------
 
 Query OK, 0 rows affected (0.013 sec)
@@ -497,7 +497,7 @@ CREATE TABLE `taxonomy_json` (
   `species_json` LONGTEXT,
   `tree_id` INT,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE utf8mb4_unicode_ci
 --------------
 
 Query OK, 0 rows affected (0.009 sec)
@@ -827,7 +827,7 @@ IGNORE 1 ROWS
 )
 --------------
 
-Query OK, 175015 rows affected (5.228 sec)
+Query OK, 175015 rows affected (6.061 sec)
 Records: 175015  Deleted: 0  Skipped: 0  Warnings: 0
 
 Bye
@@ -841,7 +841,7 @@ SELECT COUNT(*) AS total_count, 175015 AS should_be FROM taxonomy_node
 +-------------+-----------+
 |      175015 |    175015 |
 +-------------+-----------+
-1 row in set (1.836 sec)
+1 row in set (1.812 sec)
 
 Bye
 --------------
@@ -877,7 +877,7 @@ IGNORE 1 ROWS
 )
 --------------
 
-Query OK, 18084 rows affected (0.239 sec)
+Query OK, 18084 rows affected (0.309 sec)
 Records: 18084  Deleted: 0  Skipped: 0  Warnings: 0
 
 --------------
@@ -906,7 +906,7 @@ Statement prepared
 EXECUTE st
 --------------
 
-Query OK, 0 rows affected (0.006 sec)
+Query OK, 0 rows affected (0.016 sec)
 Records: 0  Duplicates: 0  Warnings: 0
 
 --------------
@@ -946,7 +946,7 @@ IGNORE 1 ROWS
 )
 --------------
 
-Query OK, 39446 rows affected (0.193 sec)
+Query OK, 39446 rows affected (0.173 sec)
 Records: 39446  Deleted: 0  Skipped: 0  Warnings: 0
 
 Bye
@@ -960,7 +960,7 @@ SELECT COUNT(*) AS total_count, 39446 AS should_be FROM taxonomy_node_merge_spli
 +-------------+-----------+
 |       39446 |     39446 |
 +-------------+-----------+
-1 row in set (0.005 sec)
+1 row in set (0.006 sec)
 
 Bye
 --------------
@@ -996,7 +996,7 @@ SET
   tag_csv_min = NULL
 --------------
 
-Query OK, 174740 rows affected (1.146 sec)
+Query OK, 174740 rows affected (1.111 sec)
 Records: 174740  Deleted: 0  Skipped: 0  Warnings: 0
 
 Bye
@@ -1010,14 +1010,14 @@ SELECT COUNT(*) AS total_count, 174740 AS should_be FROM taxonomy_node_delta
 +-------------+-----------+
 |      174740 |    174740 |
 +-------------+-----------+
-1 row in set (0.048 sec)
+1 row in set (0.047 sec)
 
 Bye
 --------------
 DROP VIEW IF EXISTS `taxonomy_node_names`
 --------------
 
-Query OK, 0 rows affected (0.002 sec)
+Query OK, 0 rows affected (0.003 sec)
 
 --------------
 CREATE VIEW `taxonomy_node_names` AS
@@ -1078,14 +1078,14 @@ WHERE
     AND tn.`is_obsolete` = 0
 --------------
 
-Query OK, 0 rows affected (0.007 sec)
+Query OK, 0 rows affected (0.008 sec)
 
 Bye
 --------------
 DROP VIEW IF EXISTS `taxonomy_node_changes`
 --------------
 
-Query OK, 0 rows affected (0.002 sec)
+Query OK, 0 rows affected (0.003 sec)
 
 --------------
 CREATE VIEW `taxonomy_node_changes` AS
@@ -1165,14 +1165,14 @@ LEFT JOIN (
 ) AS pt ON pt.taxnode_id = n.taxnode_id
 --------------
 
-Query OK, 0 rows affected (0.008 sec)
+Query OK, 0 rows affected (0.011 sec)
 
 Bye
 --------------
 DROP VIEW IF EXISTS `MSL_export_fast`
 --------------
 
-Query OK, 0 rows affected (0.002 sec)
+Query OK, 0 rows affected (0.004 sec)
 
 --------------
 CREATE VIEW `MSL_export_fast` AS
@@ -1262,14 +1262,14 @@ WHERE tn.is_deleted = 0
   AND tn.level_id = 600
 --------------
 
-Query OK, 0 rows affected (0.004 sec)
+Query OK, 0 rows affected (0.006 sec)
 
 Bye
 --------------
 DROP VIEW IF EXISTS `species_historic_name_lut`
 --------------
 
-Query OK, 0 rows affected (0.002 sec)
+Query OK, 0 rows affected (0.004 sec)
 
 --------------
 CREATE VIEW `species_historic_name_lut` AS
@@ -1311,14 +1311,14 @@ AND old.level_id = 600
 GROUP BY old.name, old.ictv_id
 --------------
 
-Query OK, 0 rows affected (0.004 sec)
+Query OK, 0 rows affected (0.007 sec)
 
 Bye
 --------------
 DROP VIEW IF EXISTS `species_isolates_alpha_num1_num2`
 --------------
 
-Query OK, 0 rows affected (0.002 sec)
+Query OK, 0 rows affected (0.004 sec)
 
 --------------
 CREATE VIEW `species_isolates_alpha_num1_num2` AS
@@ -1376,14 +1376,14 @@ FROM (
 ) AS src3
 --------------
 
-Query OK, 0 rows affected (0.003 sec)
+Query OK, 0 rows affected (0.007 sec)
 
 Bye
 --------------
 DROP VIEW IF EXISTS `species_latest`
 --------------
 
-Query OK, 0 rows affected (0.002 sec)
+Query OK, 0 rows affected (0.004 sec)
 
 --------------
 CREATE VIEW `species_latest` AS
@@ -1492,14 +1492,14 @@ WHERE tn.msl_release_num = (SELECT MAX(msl_release_num) FROM taxonomy_toc)
 AND `rank` = 'species'
 --------------
 
-Query OK, 0 rows affected (0.004 sec)
+Query OK, 0 rows affected (0.007 sec)
 
 Bye
 --------------
 DROP VIEW IF EXISTS `taxonomy_node_dx`
 --------------
 
-Query OK, 0 rows affected (0.002 sec)
+Query OK, 0 rows affected (0.005 sec)
 
 --------------
 CREATE VIEW `taxonomy_node_dx` AS
@@ -1532,14 +1532,14 @@ LEFT OUTER JOIN taxonomy_node nt
     ON nt.taxnode_id = nd.new_taxid
 --------------
 
-Query OK, 0 rows affected (0.003 sec)
+Query OK, 0 rows affected (0.006 sec)
 
 Bye
 --------------
 DROP VIEW IF EXISTS `taxonomy_node_export`
 --------------
 
-Query OK, 0 rows affected (0.002 sec)
+Query OK, 0 rows affected (0.005 sec)
 
 --------------
 CREATE VIEW `taxonomy_node_export` AS
@@ -1598,14 +1598,14 @@ ORDER BY
     tn.`left_idx`
 --------------
 
-Query OK, 0 rows affected (0.002 sec)
+Query OK, 0 rows affected (0.006 sec)
 
 Bye
 --------------
 DROP VIEW IF EXISTS `taxonomy_node_x`
 --------------
 
-Query OK, 0 rows affected (0.002 sec)
+Query OK, 0 rows affected (0.005 sec)
 
 --------------
 CREATE VIEW `taxonomy_node_x` AS
@@ -1628,14 +1628,14 @@ JOIN
     ON node.`ictv_id` IN (ms.`next_ictv_id`)
 --------------
 
-Query OK, 0 rows affected (0.005 sec)
+Query OK, 0 rows affected (0.008 sec)
 
 Bye
 --------------
 DROP VIEW IF EXISTS `taxonomy_toc_dx`
 --------------
 
-Query OK, 0 rows affected (0.002 sec)
+Query OK, 0 rows affected (0.005 sec)
 
 --------------
 CREATE VIEW `taxonomy_toc_dx` AS
@@ -1651,14 +1651,14 @@ JOIN
     ON t2.`msl_release_num` = t1.`msl_release_num` - 1
 --------------
 
-Query OK, 0 rows affected (0.002 sec)
+Query OK, 0 rows affected (0.006 sec)
 
 Bye
 --------------
 DROP VIEW IF EXISTS `view_taxa_level_counts_by_release`
 --------------
 
-Query OK, 0 rows affected (0.002 sec)
+Query OK, 0 rows affected (0.005 sec)
 
 --------------
 CREATE VIEW `view_taxa_level_counts_by_release` AS
@@ -1722,14 +1722,14 @@ WHERE `release`.msl_release_num IS NOT NULL
 AND `release`.name NOT LIKE 'unassigned'
 --------------
 
-Query OK, 0 rows affected (0.003 sec)
+Query OK, 0 rows affected (0.007 sec)
 
 Bye
 --------------
 DROP VIEW IF EXISTS `view_taxonomy_stats`
 --------------
 
-Query OK, 0 rows affected (0.002 sec)
+Query OK, 0 rows affected (0.005 sec)
 
 --------------
 CREATE VIEW `view_taxonomy_stats` AS
@@ -1763,14 +1763,14 @@ GROUP BY
     n.msl_release_num
 --------------
 
-Query OK, 0 rows affected (0.002 sec)
+Query OK, 0 rows affected (0.006 sec)
 
 Bye
 --------------
 DROP VIEW IF EXISTS `virus_isolates`
 --------------
 
-Query OK, 0 rows affected (0.002 sec)
+Query OK, 0 rows affected (0.005 sec)
 
 --------------
 CREATE VIEW `virus_isolates` AS
@@ -1817,14 +1817,14 @@ JOIN taxonomy_node_names tn ON tn.taxnode_id = si.taxnode_id
 WHERE si.species_name <> 'abolished'
 --------------
 
-Query OK, 0 rows affected (0.003 sec)
+Query OK, 0 rows affected (0.007 sec)
 
 Bye
 --------------
 DROP VIEW IF EXISTS `vmr_export`
 --------------
 
-Query OK, 0 rows affected (0.002 sec)
+Query OK, 0 rows affected (0.005 sec)
 
 --------------
 CREATE VIEW `vmr_export` AS 
@@ -1871,49 +1871,49 @@ ORDER BY si.species_sort, si.isolate_sort
 LIMIT 1000000
 --------------
 
-Query OK, 0 rows affected (0.003 sec)
+Query OK, 0 rows affected (0.007 sec)
 
 Bye
 --------------
 CREATE INDEX idx_taxonomy_node_parent_level_tree ON taxonomy_node (parent_id, level_id, tree_id)
 --------------
 
-Query OK, 0 rows affected (3.770 sec)
+Query OK, 0 rows affected (3.777 sec)
 Records: 0  Duplicates: 0  Warnings: 0
 
 --------------
 CREATE INDEX idx_taxonomy_node_taxnode_tree ON taxonomy_node (taxnode_id, tree_id)
 --------------
 
-Query OK, 0 rows affected (3.670 sec)
+Query OK, 0 rows affected (3.640 sec)
 Records: 0  Duplicates: 0  Warnings: 0
 
 --------------
 CREATE INDEX idx_taxonomy_node_tree_level ON taxonomy_node (tree_id, level_id)
 --------------
 
-Query OK, 0 rows affected (3.719 sec)
+Query OK, 0 rows affected (3.695 sec)
 Records: 0  Duplicates: 0  Warnings: 0
 
 --------------
 CREATE INDEX idx_node_hidden_msl_name_treelevel ON taxonomy_node (is_hidden, msl_release_num, name, tree_id, level_id)
 --------------
 
-Query OK, 0 rows affected (3.859 sec)
+Query OK, 0 rows affected (3.870 sec)
 Records: 0  Duplicates: 0  Warnings: 0
 
 --------------
 CREATE INDEX idx_tn_name ON taxonomy_node (name)
 --------------
 
-Query OK, 0 rows affected (3.788 sec)
+Query OK, 0 rows affected (3.797 sec)
 Records: 0  Duplicates: 0  Warnings: 0
 
 --------------
 CREATE INDEX idx_tn_name_mslrelease ON taxonomy_node (name, msl_release_num)
 --------------
 
-Query OK, 0 rows affected (3.796 sec)
+Query OK, 0 rows affected (3.816 sec)
 Records: 0  Duplicates: 0  Warnings: 0
 
 --------------
@@ -1927,42 +1927,42 @@ Records: 0  Duplicates: 0  Warnings: 0
 CREATE INDEX abbrev ON taxonomy_molecule (abbrev)
 --------------
 
-Query OK, 0 rows affected (0.012 sec)
+Query OK, 0 rows affected (0.020 sec)
 Records: 0  Duplicates: 0  Warnings: 0
 
 --------------
 CREATE INDEX name ON taxonomy_genome_coverage (name)
 --------------
 
-Query OK, 0 rows affected (0.012 sec)
+Query OK, 0 rows affected (0.022 sec)
 Records: 0  Duplicates: 0  Warnings: 0
 
 --------------
 CREATE INDEX taxonomy_node_merge_split_next_ictv_id_IDX ON taxonomy_node_merge_split (next_ictv_id)
 --------------
 
-Query OK, 0 rows affected (0.120 sec)
+Query OK, 0 rows affected (0.126 sec)
 Records: 0  Duplicates: 0  Warnings: 0
 
 --------------
 CREATE INDEX taxonomy_node_merge_split_prev_ictv_id_IDX ON taxonomy_node_merge_split (prev_ictv_id)
 --------------
 
-Query OK, 0 rows affected (0.052 sec)
+Query OK, 0 rows affected (0.055 sec)
 Records: 0  Duplicates: 0  Warnings: 0
 
 --------------
 CREATE INDEX idx_taxonomy_node_delta_prev_taxid ON taxonomy_node_delta (prev_taxid)
 --------------
 
-Query OK, 0 rows affected (0.892 sec)
+Query OK, 0 rows affected (0.891 sec)
 Records: 0  Duplicates: 0  Warnings: 0
 
 --------------
 CREATE INDEX idx_taxonomy_node_delta_new_taxid ON taxonomy_node_delta (new_taxid)
 --------------
 
-Query OK, 0 rows affected (0.210 sec)
+Query OK, 0 rows affected (0.203 sec)
 Records: 0  Duplicates: 0  Warnings: 0
 
 --------------
@@ -1976,14 +1976,14 @@ Records: 0  Duplicates: 0  Warnings: 0
 CREATE INDEX idx_taxonomy_json_parent_taxnode_tree_ghost ON taxonomy_json (parent_taxnode_id, tree_id, is_ghost_node)
 --------------
 
-Query OK, 0 rows affected (0.014 sec)
+Query OK, 0 rows affected (0.013 sec)
 Records: 0  Duplicates: 0  Warnings: 0
 
 --------------
 CREATE INDEX idx_taxonomy_json_id ON taxonomy_json (id)
 --------------
 
-Query OK, 0 rows affected (0.017 sec)
+Query OK, 0 rows affected (0.016 sec)
 Records: 0  Duplicates: 0  Warnings: 0
 
 --------------
@@ -1997,7 +1997,7 @@ Records: 0  Duplicates: 0  Warnings: 0
 CREATE INDEX idx_tj_tree_parent ON taxonomy_json (tree_id, parent_id)
 --------------
 
-Query OK, 0 rows affected (0.019 sec)
+Query OK, 0 rows affected (0.018 sec)
 Records: 0  Duplicates: 0  Warnings: 0
 
 --------------
@@ -2033,7 +2033,7 @@ ALTER TABLE `taxonomy_node_merge_split`
     ON DELETE CASCADE
 --------------
 
-Query OK, 39446 rows affected (1.340 sec)
+Query OK, 39446 rows affected (1.314 sec)
 Records: 39446  Duplicates: 0  Warnings: 0
 
 --------------
@@ -2043,7 +2043,7 @@ FOREIGN KEY (`genome_coverage`)
 REFERENCES `taxonomy_genome_coverage` (`name`)
 --------------
 
-Query OK, 18084 rows affected (0.312 sec)
+Query OK, 18084 rows affected (0.320 sec)
 Records: 18084  Duplicates: 0  Warnings: 0
 
 --------------
@@ -2053,7 +2053,7 @@ FOREIGN KEY (`host_source`)
 REFERENCES `taxonomy_host_source` (`host_source`)
 --------------
 
-Query OK, 18084 rows affected (0.274 sec)
+Query OK, 18084 rows affected (0.289 sec)
 Records: 18084  Duplicates: 0  Warnings: 0
 
 --------------
@@ -2063,7 +2063,7 @@ FOREIGN KEY (`molecule`)
 REFERENCES `taxonomy_molecule` (`abbrev`)
 --------------
 
-Query OK, 18084 rows affected (0.336 sec)
+Query OK, 18084 rows affected (0.367 sec)
 Records: 18084  Duplicates: 0  Warnings: 0
 
 --------------
@@ -2073,7 +2073,7 @@ FOREIGN KEY (`taxnode_id`)
 REFERENCES `taxonomy_node` (`taxnode_id`)
 --------------
 
-Query OK, 18084 rows affected (0.345 sec)
+Query OK, 18084 rows affected (0.384 sec)
 Records: 18084  Duplicates: 0  Warnings: 0
 
 --------------
@@ -2083,7 +2083,7 @@ FOREIGN KEY (`update_prev_taxnode_id`)
 REFERENCES `taxonomy_node` (`taxnode_id`)
 --------------
 
-Query OK, 18084 rows affected (0.353 sec)
+Query OK, 18084 rows affected (0.397 sec)
 Records: 18084  Duplicates: 0  Warnings: 0
 
 --------------
@@ -2093,7 +2093,7 @@ FOREIGN KEY (`in_change`)
 REFERENCES `taxonomy_change_in` (`change`)
 --------------
 
-Query OK, 175015 rows affected (11.452 sec)
+Query OK, 175015 rows affected (12.806 sec)
 Records: 175015  Duplicates: 0  Warnings: 0
 
 --------------
@@ -2103,7 +2103,7 @@ FOREIGN KEY (`out_change`)
 REFERENCES `taxonomy_change_out` (`change`)
 --------------
 
-Query OK, 175015 rows affected (8.973 sec)
+Query OK, 175015 rows affected (10.292 sec)
 Records: 175015  Duplicates: 0  Warnings: 0
 
 --------------
@@ -2113,7 +2113,7 @@ FOREIGN KEY (`genome_coverage`)
 REFERENCES `taxonomy_genome_coverage` (`genome_coverage`)
 --------------
 
-Query OK, 175015 rows affected (9.376 sec)
+Query OK, 175015 rows affected (10.095 sec)
 Records: 175015  Duplicates: 0  Warnings: 0
 
 --------------
@@ -2123,7 +2123,7 @@ FOREIGN KEY (`host_source`)
 REFERENCES `taxonomy_host_source` (`host_source`)
 --------------
 
-Query OK, 175015 rows affected (9.601 sec)
+Query OK, 175015 rows affected (10.519 sec)
 Records: 175015  Duplicates: 0  Warnings: 0
 
 --------------
@@ -2134,7 +2134,7 @@ REFERENCES `taxonomy_level` (`id`)
 ON DELETE CASCADE
 --------------
 
-Query OK, 175015 rows affected (9.918 sec)
+Query OK, 175015 rows affected (10.817 sec)
 Records: 175015  Duplicates: 0  Warnings: 0
 
 --------------
@@ -2144,7 +2144,7 @@ FOREIGN KEY (`inher_molecule_id`)
 REFERENCES `taxonomy_molecule` (`id`)
 --------------
 
-Query OK, 175015 rows affected (10.055 sec)
+Query OK, 175015 rows affected (11.175 sec)
 Records: 175015  Duplicates: 0  Warnings: 0
 
 --------------
@@ -2154,7 +2154,7 @@ FOREIGN KEY (`molecule_id`)
 REFERENCES `taxonomy_molecule` (`id`)
 --------------
 
-Query OK, 175015 rows affected (10.334 sec)
+Query OK, 175015 rows affected (11.611 sec)
 Records: 175015  Duplicates: 0  Warnings: 0
 
 --------------
@@ -2164,7 +2164,7 @@ FOREIGN KEY (`family_id`)
 REFERENCES `taxonomy_node` (`taxnode_id`)
 --------------
 
-Query OK, 175015 rows affected (11.339 sec)
+Query OK, 175015 rows affected (12.466 sec)
 Records: 175015  Duplicates: 0  Warnings: 0
 
 --------------
@@ -2174,7 +2174,7 @@ FOREIGN KEY (`genus_id`)
 REFERENCES `taxonomy_node` (`taxnode_id`)
 --------------
 
-Query OK, 175015 rows affected (11.278 sec)
+Query OK, 175015 rows affected (12.706 sec)
 Records: 175015  Duplicates: 0  Warnings: 0
 
 --------------
@@ -2184,7 +2184,7 @@ FOREIGN KEY (`ictv_id`)
 REFERENCES `taxonomy_node` (`taxnode_id`)
 --------------
 
-Query OK, 175015 rows affected (11.560 sec)
+Query OK, 175015 rows affected (12.917 sec)
 Records: 175015  Duplicates: 0  Warnings: 0
 
 --------------
@@ -2194,7 +2194,7 @@ FOREIGN KEY (`order_id`)
 REFERENCES `taxonomy_node` (`taxnode_id`)
 --------------
 
-Query OK, 175015 rows affected (11.500 sec)
+Query OK, 175015 rows affected (13.230 sec)
 Records: 175015  Duplicates: 0  Warnings: 0
 
 --------------
@@ -2204,7 +2204,7 @@ FOREIGN KEY (`species_id`)
 REFERENCES `taxonomy_node` (`taxnode_id`)
 --------------
 
-Query OK, 175015 rows affected (11.916 sec)
+Query OK, 175015 rows affected (13.569 sec)
 Records: 175015  Duplicates: 0  Warnings: 0
 
 --------------
@@ -2214,7 +2214,7 @@ FOREIGN KEY (`subfamily_id`)
 REFERENCES `taxonomy_node` (`taxnode_id`)
 --------------
 
-Query OK, 175015 rows affected (12.182 sec)
+Query OK, 175015 rows affected (13.321 sec)
 Records: 175015  Duplicates: 0  Warnings: 0
 
 --------------
@@ -2224,7 +2224,7 @@ FOREIGN KEY (`tree_id`)
 REFERENCES `taxonomy_node` (`taxnode_id`)
 --------------
 
-Query OK, 175015 rows affected (12.554 sec)
+Query OK, 175015 rows affected (13.591 sec)
 Records: 175015  Duplicates: 0  Warnings: 0
 
 --------------
@@ -2234,7 +2234,7 @@ FOREIGN KEY (`class_id`)
 REFERENCES `taxonomy_node` (`taxnode_id`)
 --------------
 
-Query OK, 175015 rows affected (12.285 sec)
+Query OK, 175015 rows affected (13.551 sec)
 Records: 175015  Duplicates: 0  Warnings: 0
 
 --------------
@@ -2244,7 +2244,7 @@ FOREIGN KEY (`kingdom_id`)
 REFERENCES `taxonomy_node` (`taxnode_id`)
 --------------
 
-Query OK, 175015 rows affected (12.696 sec)
+Query OK, 175015 rows affected (14.059 sec)
 Records: 175015  Duplicates: 0  Warnings: 0
 
 --------------
@@ -2254,7 +2254,7 @@ FOREIGN KEY (`phylum_id`)
 REFERENCES `taxonomy_node` (`taxnode_id`)
 --------------
 
-Query OK, 175015 rows affected (12.744 sec)
+Query OK, 175015 rows affected (14.242 sec)
 Records: 175015  Duplicates: 0  Warnings: 0
 
 --------------
@@ -2264,7 +2264,7 @@ FOREIGN KEY (`realm_id`)
 REFERENCES `taxonomy_node` (`taxnode_id`)
 --------------
 
-Query OK, 175015 rows affected (12.903 sec)
+Query OK, 175015 rows affected (14.278 sec)
 Records: 175015  Duplicates: 0  Warnings: 0
 
 --------------
@@ -2274,7 +2274,7 @@ FOREIGN KEY (`subclass_id`)
 REFERENCES `taxonomy_node` (`taxnode_id`)
 --------------
 
-Query OK, 175015 rows affected (13.173 sec)
+Query OK, 175015 rows affected (14.505 sec)
 Records: 175015  Duplicates: 0  Warnings: 0
 
 --------------
@@ -2284,7 +2284,7 @@ FOREIGN KEY (`subgenus_id`)
 REFERENCES `taxonomy_node` (`taxnode_id`)
 --------------
 
-Query OK, 175015 rows affected (13.572 sec)
+Query OK, 175015 rows affected (14.917 sec)
 Records: 175015  Duplicates: 0  Warnings: 0
 
 --------------
@@ -2294,7 +2294,7 @@ FOREIGN KEY (`subkingdom_id`)
 REFERENCES `taxonomy_node` (`taxnode_id`)
 --------------
 
-Query OK, 175015 rows affected (13.873 sec)
+Query OK, 175015 rows affected (14.828 sec)
 Records: 175015  Duplicates: 0  Warnings: 0
 
 --------------
@@ -2304,7 +2304,7 @@ FOREIGN KEY (`suborder_id`)
 REFERENCES `taxonomy_node` (`taxnode_id`)
 --------------
 
-Query OK, 175015 rows affected (13.984 sec)
+Query OK, 175015 rows affected (15.060 sec)
 Records: 175015  Duplicates: 0  Warnings: 0
 
 --------------
@@ -2314,7 +2314,7 @@ FOREIGN KEY (`subphylum_id`)
 REFERENCES `taxonomy_node` (`taxnode_id`)
 --------------
 
-Query OK, 175015 rows affected (14.236 sec)
+Query OK, 175015 rows affected (15.422 sec)
 Records: 175015  Duplicates: 0  Warnings: 0
 
 --------------
@@ -2324,7 +2324,7 @@ FOREIGN KEY (`subrealm_id`)
 REFERENCES `taxonomy_node` (`taxnode_id`)
 --------------
 
-Query OK, 175015 rows affected (14.088 sec)
+Query OK, 175015 rows affected (15.662 sec)
 Records: 175015  Duplicates: 0  Warnings: 0
 
 --------------
@@ -2334,7 +2334,7 @@ FOREIGN KEY (`tree_id`, `msl_release_num`)
 REFERENCES `taxonomy_toc` (`tree_id`, `msl_release_num`)
 --------------
 
-Query OK, 175015 rows affected (14.350 sec)
+Query OK, 175015 rows affected (15.979 sec)
 Records: 175015  Duplicates: 0  Warnings: 0
 
 --------------
@@ -2343,7 +2343,7 @@ ALTER TABLE `taxonomy_json_rank`
   FOREIGN KEY (`level_id`) REFERENCES `taxonomy_level` (`id`)
 --------------
 
-Query OK, 0 rows affected (0.016 sec)
+Query OK, 0 rows affected (0.035 sec)
 Records: 0  Duplicates: 0  Warnings: 0
 
 --------------
@@ -2352,7 +2352,7 @@ ALTER TABLE `taxonomy_json_rank`
   FOREIGN KEY (`tree_id`) REFERENCES `taxonomy_node` (`taxnode_id`)
 --------------
 
-Query OK, 0 rows affected (0.015 sec)
+Query OK, 0 rows affected (0.030 sec)
 Records: 0  Duplicates: 0  Warnings: 0
 
 --------------
@@ -2361,7 +2361,7 @@ ALTER TABLE `taxonomy_json`
   FOREIGN KEY (`parent_taxnode_id`) REFERENCES `taxonomy_node` (`taxnode_id`)
 --------------
 
-Query OK, 0 rows affected (0.016 sec)
+Query OK, 0 rows affected (0.034 sec)
 Records: 0  Duplicates: 0  Warnings: 0
 
 --------------
@@ -2370,7 +2370,7 @@ ALTER TABLE `taxonomy_json`
   FOREIGN KEY (`taxnode_id`) REFERENCES `taxonomy_node` (`taxnode_id`)
 --------------
 
-Query OK, 0 rows affected (0.015 sec)
+Query OK, 0 rows affected (0.033 sec)
 Records: 0  Duplicates: 0  Warnings: 0
 
 --------------
@@ -2379,7 +2379,7 @@ ALTER TABLE `taxonomy_json`
   FOREIGN KEY (`tree_id`) REFERENCES `taxonomy_node` (`taxnode_id`)
 --------------
 
-Query OK, 0 rows affected (0.014 sec)
+Query OK, 0 rows affected (0.032 sec)
 Records: 0  Duplicates: 0  Warnings: 0
 
 Bye
@@ -2387,7 +2387,7 @@ Bye
 DROP FUNCTION IF EXISTS count_accents
 --------------
 
-Query OK, 0 rows affected (0.002 sec)
+Query OK, 0 rows affected (0.006 sec)
 
 --------------
 CREATE FUNCTION count_accents(in_string VARCHAR(1000) CHARACTER SET utf8mb4)
@@ -2411,14 +2411,14 @@ BEGIN
 END
 --------------
 
-Query OK, 0 rows affected (0.003 sec)
+Query OK, 0 rows affected (0.004 sec)
 
 Bye
 --------------
 DROP FUNCTION IF EXISTS udf_getChildTaxaCounts
 --------------
 
-Query OK, 0 rows affected (0.002 sec)
+Query OK, 0 rows affected (0.004 sec)
 
 --------------
 CREATE FUNCTION udf_getChildTaxaCounts(in_taxnode_id INT)
@@ -2451,14 +2451,14 @@ BEGIN
 END
 --------------
 
-Query OK, 0 rows affected (0.002 sec)
+Query OK, 0 rows affected (0.004 sec)
 
 Bye
 --------------
 DROP FUNCTION IF EXISTS udf_getMSL
 --------------
 
-Query OK, 0 rows affected (0.002 sec)
+Query OK, 0 rows affected (0.004 sec)
 
 --------------
 CREATE FUNCTION udf_getMSL(in_tree_id INT)
@@ -2485,14 +2485,14 @@ BEGIN
 END
 --------------
 
-Query OK, 0 rows affected (0.002 sec)
+Query OK, 0 rows affected (0.004 sec)
 
 Bye
 --------------
 DROP FUNCTION IF EXISTS udf_getTaxNodeChildInfo
 --------------
 
-Query OK, 0 rows affected (0.003 sec)
+Query OK, 0 rows affected (0.006 sec)
 
 --------------
 CREATE FUNCTION udf_getTaxNodeChildInfo(
@@ -2581,14 +2581,14 @@ BEGIN
 END
 --------------
 
-Query OK, 0 rows affected (0.003 sec)
+Query OK, 0 rows affected (0.006 sec)
 
 Bye
 --------------
 DROP FUNCTION IF EXISTS udf_getTreeID
 --------------
 
-Query OK, 0 rows affected (0.002 sec)
+Query OK, 0 rows affected (0.004 sec)
 
 --------------
 CREATE FUNCTION udf_getTreeID(in_msl INT)
@@ -2616,14 +2616,14 @@ BEGIN
 END
 --------------
 
-Query OK, 0 rows affected (0.002 sec)
+Query OK, 0 rows affected (0.004 sec)
 
 Bye
 --------------
 DROP FUNCTION IF EXISTS udf_rankCountsToStringWithPurals
 --------------
 
-Query OK, 0 rows affected (0.003 sec)
+Query OK, 0 rows affected (0.006 sec)
 
 --------------
 CREATE FUNCTION udf_rankCountsToStringWithPurals(
@@ -2881,14 +2881,14 @@ BEGIN
 END
 --------------
 
-Query OK, 0 rows affected (0.003 sec)
+Query OK, 0 rows affected (0.007 sec)
 
 Bye
 --------------
 DROP FUNCTION IF EXISTS udf_singularOrPluralTaxLevelNames
 --------------
 
-Query OK, 0 rows affected (0.002 sec)
+Query OK, 0 rows affected (0.004 sec)
 
 --------------
 CREATE FUNCTION udf_singularOrPluralTaxLevelNames(
@@ -2933,14 +2933,14 @@ BEGIN
 END
 --------------
 
-Query OK, 0 rows affected (0.002 sec)
+Query OK, 0 rows affected (0.004 sec)
 
 Bye
 --------------
 DROP FUNCTION IF EXISTS vgd_strrchr
 --------------
 
-Query OK, 0 rows affected (0.002 sec)
+Query OK, 0 rows affected (0.006 sec)
 
 --------------
 CREATE FUNCTION vgd_strrchr(
@@ -2967,14 +2967,14 @@ BEGIN
 END
 --------------
 
-Query OK, 0 rows affected (0.003 sec)
+Query OK, 0 rows affected (0.004 sec)
 
 Bye
 --------------
 DROP PROCEDURE IF EXISTS createParentGhostNodes
 --------------
 
-Query OK, 0 rows affected (0.002 sec)
+Query OK, 0 rows affected (0.006 sec)
 
 --------------
 CREATE PROCEDURE createParentGhostNodes(
@@ -3124,14 +3124,14 @@ BEGIN
 END
 --------------
 
-Query OK, 0 rows affected (0.003 sec)
+Query OK, 0 rows affected (0.004 sec)
 
 Bye
 --------------
 DROP PROCEDURE IF EXISTS createIntermediateGhostNodes
 --------------
 
-Query OK, 0 rows affected (0.003 sec)
+Query OK, 0 rows affected (0.006 sec)
 
 --------------
 CREATE PROCEDURE createIntermediateGhostNodes(
@@ -3282,14 +3282,14 @@ BEGIN
 END
 --------------
 
-Query OK, 0 rows affected (0.003 sec)
+Query OK, 0 rows affected (0.006 sec)
 
 Bye
 --------------
 DROP PROCEDURE IF EXISTS createGhostNodes
 --------------
 
-Query OK, 0 rows affected (0.002 sec)
+Query OK, 0 rows affected (0.004 sec)
 
 --------------
 CREATE PROCEDURE createGhostNodes(
@@ -3366,14 +3366,14 @@ BEGIN
 END
 --------------
 
-Query OK, 0 rows affected (0.002 sec)
+Query OK, 0 rows affected (0.006 sec)
 
 Bye
 --------------
 DROP PROCEDURE IF EXISTS initializeJsonColumn
 --------------
 
-Query OK, 0 rows affected (0.003 sec)
+Query OK, 0 rows affected (0.006 sec)
 
 --------------
 CREATE PROCEDURE initializeJsonColumn(IN treeID INT)
@@ -3492,14 +3492,14 @@ BEGIN
 END
 --------------
 
-Query OK, 0 rows affected (0.002 sec)
+Query OK, 0 rows affected (0.006 sec)
 
 Bye
 --------------
 DROP PROCEDURE IF EXISTS initializeTaxonomyJsonFromTaxonomyNode
 --------------
 
-Query OK, 0 rows affected (0.002 sec)
+Query OK, 0 rows affected (0.004 sec)
 
 --------------
 CREATE PROCEDURE initializeTaxonomyJsonFromTaxonomyNode(IN treeID INT)
@@ -3609,14 +3609,14 @@ BEGIN
 END
 --------------
 
-Query OK, 0 rows affected (0.002 sec)
+Query OK, 0 rows affected (0.006 sec)
 
 Bye
 --------------
 DROP PROCEDURE IF EXISTS populateTaxonomyJSON
 --------------
 
-Query OK, 0 rows affected (0.002 sec)
+Query OK, 0 rows affected (0.006 sec)
 
 --------------
 CREATE PROCEDURE populateTaxonomyJSON(IN treeID INT)
@@ -3720,14 +3720,14 @@ BEGIN
 END
 --------------
 
-Query OK, 0 rows affected (0.003 sec)
+Query OK, 0 rows affected (0.004 sec)
 
 Bye
 --------------
 DROP PROCEDURE IF EXISTS populateTaxonomyJsonForAllReleases
 --------------
 
-Query OK, 0 rows affected (0.002 sec)
+Query OK, 0 rows affected (0.004 sec)
 
 --------------
 CREATE PROCEDURE populateTaxonomyJsonForAllReleases()
@@ -3784,14 +3784,14 @@ BEGIN
 END
 --------------
 
-Query OK, 0 rows affected (0.003 sec)
+Query OK, 0 rows affected (0.006 sec)
 
 Bye
 --------------
 DROP PROCEDURE IF EXISTS exportReleasesJSON
 --------------
 
-Query OK, 0 rows affected (0.002 sec)
+Query OK, 0 rows affected (0.004 sec)
 
 --------------
 CREATE PROCEDURE exportReleasesJSON()
@@ -3876,14 +3876,14 @@ BEGIN
 END
 --------------
 
-Query OK, 0 rows affected (0.003 sec)
+Query OK, 0 rows affected (0.006 sec)
 
 Bye
 --------------
 DROP PROCEDURE IF EXISTS exportTaxonomyJSON
 --------------
 
-Query OK, 0 rows affected (0.002 sec)
+Query OK, 0 rows affected (0.004 sec)
 
 --------------
 CREATE PROCEDURE exportTaxonomyJSON(IN treeID INT)
@@ -3968,14 +3968,14 @@ BEGIN
 END
 --------------
 
-Query OK, 0 rows affected (0.003 sec)
+Query OK, 0 rows affected (0.006 sec)
 
 Bye
 --------------
 DROP PROCEDURE IF EXISTS get_taxon_names_in_msl
 --------------
 
-Query OK, 0 rows affected (0.002 sec)
+Query OK, 0 rows affected (0.004 sec)
 
 --------------
 CREATE PROCEDURE get_taxon_names_in_msl
@@ -4027,14 +4027,14 @@ BEGIN
 END
 --------------
 
-Query OK, 0 rows affected (0.002 sec)
+Query OK, 0 rows affected (0.006 sec)
 
 Bye
 --------------
 DROP PROCEDURE IF EXISTS getTaxonReleaseHistory
 --------------
 
-Query OK, 0 rows affected (0.003 sec)
+Query OK, 0 rows affected (0.006 sec)
 
 --------------
 CREATE PROCEDURE getTaxonReleaseHistory(
@@ -4287,14 +4287,14 @@ BEGIN
 END
 --------------
 
-Query OK, 0 rows affected (0.004 sec)
+Query OK, 0 rows affected (0.009 sec)
 
 Bye
 --------------
 DROP PROCEDURE IF EXISTS getVirusIsolates
 --------------
 
-Query OK, 0 rows affected (0.003 sec)
+Query OK, 0 rows affected (0.006 sec)
 
 --------------
 CREATE PROCEDURE getVirusIsolates(
@@ -4465,14 +4465,14 @@ BEGIN
 END
 --------------
 
-Query OK, 0 rows affected (0.003 sec)
+Query OK, 0 rows affected (0.007 sec)
 
 Bye
 --------------
 DROP PROCEDURE IF EXISTS initializeTaxonomyJsonRanks
 --------------
 
-Query OK, 0 rows affected (0.002 sec)
+Query OK, 0 rows affected (0.004 sec)
 
 --------------
 CREATE PROCEDURE initializeTaxonomyJsonRanks()
@@ -4547,14 +4547,14 @@ BEGIN
 END
 --------------
 
-Query OK, 0 rows affected (0.002 sec)
+Query OK, 0 rows affected (0.006 sec)
 
 Bye
 --------------
 DROP PROCEDURE IF EXISTS MSL_delta_counts
 --------------
 
-Query OK, 0 rows affected (0.003 sec)
+Query OK, 0 rows affected (0.006 sec)
 
 --------------
 CREATE PROCEDURE MSL_delta_counts(IN msl_or_tree INT)
@@ -4717,14 +4717,14 @@ BEGIN
 END
 --------------
 
-Query OK, 0 rows affected (0.003 sec)
+Query OK, 0 rows affected (0.007 sec)
 
 Bye
 --------------
 DROP PROCEDURE IF EXISTS MSL_delta_report
 --------------
 
-Query OK, 0 rows affected (0.003 sec)
+Query OK, 0 rows affected (0.006 sec)
 
 --------------
 CREATE PROCEDURE MSL_delta_report(IN in_msl INT)
@@ -4770,14 +4770,14 @@ BEGIN
 END
 --------------
 
-Query OK, 0 rows affected (0.002 sec)
+Query OK, 0 rows affected (0.004 sec)
 
 Bye
 --------------
 DROP PROCEDURE IF EXISTS MSL_export_fast
 --------------
 
-Query OK, 0 rows affected (0.003 sec)
+Query OK, 0 rows affected (0.006 sec)
 
 --------------
 CREATE PROCEDURE MSL_export_fast(IN msl_or_tree INT, IN taxnode_id INT)
@@ -4888,14 +4888,14 @@ BEGIN
 END
 --------------
 
-Query OK, 0 rows affected (0.003 sec)
+Query OK, 0 rows affected (0.007 sec)
 
 Bye
 --------------
 DROP PROCEDURE IF EXISTS MSL_export_official
 --------------
 
-Query OK, 0 rows affected (0.003 sec)
+Query OK, 0 rows affected (0.006 sec)
 
 --------------
 CREATE PROCEDURE MSL_export_official(IN msl_or_tree INT, IN taxnode_id INT)
@@ -5072,14 +5072,14 @@ BEGIN
 END
 --------------
 
-Query OK, 0 rows affected (0.004 sec)
+Query OK, 0 rows affected (0.009 sec)
 
 Bye
 --------------
 DROP PROCEDURE IF EXISTS QC_module_taxonomy_node_suffixes
 --------------
 
-Query OK, 0 rows affected (0.002 sec)
+Query OK, 0 rows affected (0.004 sec)
 
 --------------
 CREATE PROCEDURE QC_module_taxonomy_node_suffixes(IN filter VARCHAR(1000))
@@ -5138,14 +5138,14 @@ BEGIN
 END
 --------------
 
-Query OK, 0 rows affected (0.003 sec)
+Query OK, 0 rows affected (0.006 sec)
 
 Bye
 --------------
 DROP PROCEDURE IF EXISTS QC_run_modules
 --------------
 
-Query OK, 0 rows affected (0.002 sec)
+Query OK, 0 rows affected (0.006 sec)
 
 --------------
 CREATE PROCEDURE QC_run_modules(IN module_filter VARCHAR(200))
@@ -5196,14 +5196,14 @@ BEGIN
 END
 --------------
 
-Query OK, 0 rows affected (0.003 sec)
+Query OK, 0 rows affected (0.004 sec)
 
 Bye
 --------------
 DROP PROCEDURE IF EXISTS QC_module_ictv_id_deltas
 --------------
 
-Query OK, 0 rows affected (0.004 sec)
+Query OK, 0 rows affected (0.006 sec)
 
 --------------
 CREATE PROCEDURE QC_module_ictv_id_deltas
@@ -5336,14 +5336,14 @@ BEGIN
 END
 --------------
 
-Query OK, 0 rows affected (0.005 sec)
+Query OK, 0 rows affected (0.007 sec)
 
 Bye
 --------------
 DROP PROCEDURE IF EXISTS QC_module_taxonomy_node_delta
 --------------
 
-Query OK, 0 rows affected (0.003 sec)
+Query OK, 0 rows affected (0.004 sec)
 
 --------------
 CREATE PROCEDURE QC_module_taxonomy_node_delta
@@ -5398,7 +5398,7 @@ BEGIN
 END
 --------------
 
-Query OK, 0 rows affected (0.005 sec)
+Query OK, 0 rows affected (0.006 sec)
 
 Bye
 --------------
@@ -5481,7 +5481,7 @@ Bye
 DROP PROCEDURE IF EXISTS QC_module_taxonomy_node_ictv_resurrection
 --------------
 
-Query OK, 0 rows affected (0.004 sec)
+Query OK, 0 rows affected (0.006 sec)
 
 --------------
 CREATE PROCEDURE QC_module_taxonomy_node_ictv_resurrection
@@ -5590,7 +5590,7 @@ BEGIN
 END
 --------------
 
-Query OK, 0 rows affected (0.006 sec)
+Query OK, 0 rows affected (0.004 sec)
 
 Bye
 --------------
@@ -5659,7 +5659,7 @@ Bye
 DROP PROCEDURE IF EXISTS QC_module_virus_prop_tabs
 --------------
 
-Query OK, 0 rows affected (0.004 sec)
+Query OK, 0 rows affected (0.006 sec)
 
 --------------
 CREATE PROCEDURE QC_module_virus_prop_tabs
@@ -5712,7 +5712,7 @@ BEGIN
 END
 --------------
 
-Query OK, 0 rows affected (0.006 sec)
+Query OK, 0 rows affected (0.004 sec)
 
 Bye
 --------------
@@ -5844,7 +5844,7 @@ Bye
 DROP PROCEDURE IF EXISTS rebuild_delta_nodes
 --------------
 
-Query OK, 0 rows affected (0.006 sec)
+Query OK, 0 rows affected (0.007 sec)
 
 --------------
 CREATE PROCEDURE rebuild_delta_nodes(
@@ -6026,14 +6026,14 @@ BEGIN
 END
 --------------
 
-Query OK, 0 rows affected (0.009 sec)
+Query OK, 0 rows affected (0.008 sec)
 
 Bye
 --------------
 DROP PROCEDURE IF EXISTS searchTaxonomy
 --------------
 
-Query OK, 0 rows affected (0.006 sec)
+Query OK, 0 rows affected (0.008 sec)
 
 --------------
 CREATE PROCEDURE searchTaxonomy(
@@ -6132,14 +6132,14 @@ BEGIN
 END
 --------------
 
-Query OK, 0 rows affected (0.006 sec)
+Query OK, 0 rows affected (0.007 sec)
 
 Bye
 --------------
 DROP PROCEDURE IF EXISTS sp_simplify_molecule_id_settings
 --------------
 
-Query OK, 0 rows affected (0.006 sec)
+Query OK, 0 rows affected (0.007 sec)
 
 --------------
 CREATE PROCEDURE sp_simplify_molecule_id_settings(
@@ -6235,7 +6235,7 @@ BEGIN
 END
 --------------
 
-Query OK, 0 rows affected (0.004 sec)
+Query OK, 0 rows affected (0.005 sec)
 
 Bye
 --------------
@@ -6299,14 +6299,14 @@ BEGIN
 END
 --------------
 
-Query OK, 0 rows affected (0.007 sec)
+Query OK, 0 rows affected (0.004 sec)
 
 Bye
 --------------
 DROP PROCEDURE IF EXISTS NCBI_linkout_ft_export
 --------------
 
-Query OK, 0 rows affected (0.003 sec)
+Query OK, 0 rows affected (0.006 sec)
 
 --------------
 CREATE PROCEDURE NCBI_linkout_ft_export
@@ -6388,14 +6388,14 @@ BEGIN
 END
 --------------
 
-Query OK, 0 rows affected (0.002 sec)
+Query OK, 0 rows affected (0.006 sec)
 
 Bye
 --------------
 CALL initializeTaxonomyJsonRanks()
 --------------
 
-Query OK, 281 rows affected (0.391 sec)
+Query OK, 281 rows affected (0.408 sec)
 
 --------------
 SET @autoIncVal := (
@@ -6423,7 +6423,7 @@ Statement prepared
 EXECUTE st
 --------------
 
-Query OK, 0 rows affected (0.012 sec)
+Query OK, 0 rows affected (0.014 sec)
 Records: 0  Duplicates: 0  Warnings: 0
 
 --------------
@@ -6437,7 +6437,7 @@ Bye
 CALL populateTaxonomyJsonForAllReleases()
 --------------
 
-Query OK, 1173093 rows affected (13 min 20.827 sec)
+Query OK, 1173093 rows affected (13 min 26.966 sec)
 
 --------------
 SET @autoIncVal := (
@@ -6446,7 +6446,7 @@ SET @autoIncVal := (
 )
 --------------
 
-Query OK, 0 rows affected (0.000 sec)
+Query OK, 0 rows affected (0.001 sec)
 
 --------------
 SET @sql = CONCAT('ALTER TABLE taxonomy_json AUTO_INCREMENT = ', @autoIncVal)
@@ -6465,7 +6465,7 @@ Statement prepared
 EXECUTE st
 --------------
 
-Query OK, 0 rows affected (0.173 sec)
+Query OK, 0 rows affected (0.220 sec)
 Records: 0  Duplicates: 0  Warnings: 0
 
 --------------
@@ -6475,4 +6475,4 @@ DEALLOCATE PREPARE st
 Query OK, 0 rows affected (0.000 sec)
 
 Bye
-Total execution time: 19 minutes and 2 seconds
+Total execution time: 19 minutes and 42 seconds
