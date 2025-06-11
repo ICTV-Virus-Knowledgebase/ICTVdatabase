@@ -33,7 +33,7 @@ from (
 		-- underlying analysis query
 		---
 		select qc_mesg='ERROR: new_taxid=NULL, but not an ABOLISH',
-			d.msl, d.prev_taxid, d.new_taxid, d.tag_csv2, n.lineage, target=n.out_target
+			d.msl, d.prev_taxid, n.ictv_id, d.new_taxid, d.tag_csv2, n.lineage, target=n.out_target
 		from  taxonomy_node_delta d
 		left outer join taxonomy_node n 
 		on n.taxnode_id = d.prev_taxid
@@ -42,7 +42,7 @@ from (
 		union
 
 		select qc_mesg='ERROR: prev_taxid=NULL, but not a NEW',
-			d.msl, d.prev_taxid, d.new_taxid, d.tag_csv2, n.lineage, target=n.in_target
+			d.msl, d.prev_taxid, n.ictv_id,d.new_taxid, d.tag_csv2, n.lineage, target=n.in_target
 		from  taxonomy_node_delta d
 		left outer join taxonomy_node n 
 		on n.taxnode_id = d.new_taxid
