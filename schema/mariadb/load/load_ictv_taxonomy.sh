@@ -16,7 +16,7 @@ fi
 echo "Target database: $DBNAME"
 
 # Create the database if it doesn't exist.
-mariadb -e "CREATE DATABASE IF NOT EXISTS \`$DBNAME\` CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;"
+mariadb -e "CREATE DATABASE IF NOT EXISTS \`$DBNAME\` CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci;"
 
 # Track start time
 START_TIME=$(date +%s)
