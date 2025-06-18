@@ -1,7 +1,7 @@
-
+USE [ICTVonline40]
 GO
 
-
+/****** Object:  StoredProcedure [dbo].[rebuild_delta_nodes_2]    Script Date: 6/18/2025 7:16:23 PM ******/
 SET ANSI_NULLS ON
 GO
 
@@ -9,9 +9,12 @@ SET QUOTED_IDENTIFIER ON
 GO
 
 
+
 CREATE procedure [dbo].[rebuild_delta_nodes_2]
-	@msl int = NULL-- delete related deltas first?
+	@msl int = NULL,		 -- delete related deltas first
+	@debug_taxid int = NULL  -- debugging - only deltas going INTO that node
 AS
+
 	-- -----------------------------------------------------------------------------
 	--
 	-- build deltas from in_out changes
@@ -22,8 +25,8 @@ AS
 	-- -----------------------------------------------------------------------------
 	--
 	-- 20210505 curtish (Issue #5): obsolete is_now_type when MSL > 35, then add it back in
-	--   declare @msl int
-
+	--   declare @msl int; declare @debug_taxid int
+	--   declare @msl int; declare @debug_taxid int; set @msl=18
 	set @msl=(select isnull(@msl,MAX(msl_release_num)) from taxonomy_node)
 	select 'TARGET MSL: ',@msl
 	print '-- TARGET_MSL: '+rtrim(@MSL)
@@ -77,7 +80,7 @@ AS
 	and d.new_taxid is null
 	and n.msl_release_num=@msl
 	and n.is_deleted = 0
-	--and n.taxnode_id=20132530 -- debug
+	and (n.taxnode_id=@debug_taxid or @debug_taxid is null) -- debug
 	--group by p.lineage, n.in_target, p.msl_release_num, n.in_change, n.msl_release_num, n.lineage, n.taxnode_id, n.in_filename, cast(n.in_notes as varchar(max))
 	order by n.taxnode_id, n.msl_release_num, n.lineage
 	print '-- MSL_delta new/split INSERTED'
@@ -170,6 +173,8 @@ AS
 	join taxonomy_node prev_pmsl on prev_pmsl.taxnode_id = prev_msl.parent_id
 	left outer join taxonomy_node next_msl on next_msl.taxnode_id = src.new_taxid
 	left outer join taxonomy_node next_pmsl on next_pmsl.taxnode_id = next_msl.parent_id
+	where (@debug_taxid is null or src.new_taxid = @debug_taxid ) -- debug
+
 
 	--select * from taxonomy_node where taxnode_id in (19900137	,19910141, 19900770	,19910993)
 
@@ -241,6 +246,9 @@ AS
 	pd.prev_taxid is null and nd.new_taxid is null
 	and 
 	p.is_deleted = 0 and n.is_deleted = 0
+	and
+	(@debug_taxid is null OR n.taxnode_id = @debug_taxid) -- debug
+
 	-- and p.level_id<=300 -- debug
 	-- and p.name ='bushbush virus' -- debug
 	-- and select msl_release_num, in_change, out_change, name, lineage from taxonomy_node p where p.name in ('Bovine enterovirus', 'Bovine enterovirus 1', 'Bovine enterovirus 2') -- debug
@@ -310,6 +318,34 @@ AS
 	--order by prev_node.msl_release_num, prev_node.left_idx
 	print '-- MSL_delta IS_MOVED: UPDATED'
 
+	-- ******************************************************************************************************
+	--
+	-- MERGED - update "sibling" deltas - if one delta going into a taxon has is_merged=1, then they all should
+	--
+	-- still set proposal, in case of attribute change (is_ref, etc)
+	-- ******************************************************************************************************
+	-- declare @msl int; declare @debug_taxid int; set @msl= 18 -- debug
+	update taxonomy_node_delta set
+	/* 
+	declare @msl int; set @msl =18 
+	select 
+		taxonomy_node_delta.*, '|||', msrc.*, '>>>>',
+	 --*/ 
+		is_merged = 1,
+		proposal = msrc.proposal,
+		notes = msrc.notes
+	from taxonomy_node_delta 
+	join (
+		select new_taxid, proposal=max(proposal), notes=max(notes)
+		from taxonomy_node_delta 
+		where msl = @msl 
+		group by new_taxid
+		having count(*) > 1
+	) as msrc
+	on msrc.new_taxid = taxonomy_node_delta.new_taxid
+	where  taxonomy_node_delta.is_merged = 0 
+	print '-- MSL_delta IS_MERGED: UPDATED'
+
 
 
 	--
@@ -339,7 +375,10 @@ AS
 	/*
 	-- TEST
 	exec rebuild_delta_nodes_2 38
-	--
+
+	-- DEBUG - build only deltas into a specific node, but delete all deltas for that MSL
+	exec rebuild_delta_nodes_2 18 19990680 -- 3 way merge, with main taxon retaining name
 	*/
 GO
+
 
