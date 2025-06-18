@@ -1,7 +1,7 @@
-USE [ICTVonline40]
+
 GO
 
-/****** Object:  StoredProcedure [dbo].[QC_module_ictv_id_deltas]    Script Date: 6/4/2025 5:45:38 PM ******/
+
 SET ANSI_NULLS ON
 GO
 

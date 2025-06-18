@@ -1,7 +1,7 @@
-USE [ICTVonline40]
+
 GO
 
-/****** Object:  StoredProcedure [dbo].[NCBI_linkout_ft_export]    Script Date: 6/3/2025 5:45:16 PM ******/
+
 SET ANSI_NULLS ON
 GO
 

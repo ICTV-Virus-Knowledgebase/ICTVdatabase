@@ -1,7 +1,7 @@
-USE [ICTVonline40]
+
 GO
 
-/****** Object:  StoredProcedure [dbo].[QC_module_vmr_export_species_count]    Script Date: 6/4/2025 7:03:29 PM ******/
+
 SET ANSI_NULLS ON
 GO
 

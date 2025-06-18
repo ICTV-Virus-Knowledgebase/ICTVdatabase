@@ -1,7 +1,7 @@
-USE [ICTVonline40]
+
 GO
 
-/****** Object:  StoredProcedure [dbo].[taxonomy_node_compute_indexes]    Script Date: 6/4/2025 3:20:59 PM ******/
+
 SET ANSI_NULLS ON
 GO
 

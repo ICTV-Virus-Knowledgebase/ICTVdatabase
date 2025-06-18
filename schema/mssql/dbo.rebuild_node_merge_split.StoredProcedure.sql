@@ -1,7 +1,7 @@
-USE [ICTVonline40]
+
 GO
 
-/****** Object:  StoredProcedure [dbo].[rebuild_node_merge_split]    Script Date: 6/3/2025 7:36:52 PM ******/
+
 SET ANSI_NULLS ON
 GO
 

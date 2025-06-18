@@ -1,7 +1,7 @@
-USE [ICTVonline40]
+
 GO
 
-/****** Object:  UserDefinedFunction [dbo].[get_taxon_names_in_msl]    Script Date: 6/4/2025 5:44:36 PM ******/
+
 SET ANSI_NULLS ON
 GO
 
