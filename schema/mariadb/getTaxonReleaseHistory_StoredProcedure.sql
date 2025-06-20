@@ -1,3 +1,6 @@
+-- LRM (06202025): This is the old SP that get_taxon_history serviced used. 
+-- The new SP is called: GetTaxonHistory.
+
 USE ICTVonline39;
 
 DELIMITER $$

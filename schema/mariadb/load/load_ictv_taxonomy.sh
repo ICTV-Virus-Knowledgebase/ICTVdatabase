@@ -140,7 +140,7 @@ mariadb -D "$DBNAME" -vvv --show-warnings < sp.populateTaxonomyJsonForAllRelease
 mariadb -D "$DBNAME" -vvv --show-warnings < sp.exportReleasesJSON_create.sql
 mariadb -D "$DBNAME" -vvv --show-warnings < sp.exportTaxonomyJSON_create.sql
 mariadb -D "$DBNAME" -vvv --show-warnings < sp.get_taxon_names_in_msl_create.sql
-mariadb -D "$DBNAME" -vvv --show-warnings < sp.getTaxonReleaseHistory_create.sql
+mariadb -D "$DBNAME" -vvv --show-warnings < sp.GetTaxonHistory_create.sql
 mariadb -D "$DBNAME" -vvv --show-warnings < sp.getVirusIsolates_create.sql
 mariadb -D "$DBNAME" -vvv --show-warnings < sp.initializeTaxonomyJsonRanks_create.sql
 mariadb -D "$DBNAME" -vvv --show-warnings < sp.MSL_delta_counts_create.sql
@@ -161,15 +161,12 @@ mariadb -D "$DBNAME" -vvv --show-warnings < sp.searchTaxonomy_create.sql
 mariadb -D "$DBNAME" -vvv --show-warnings < sp.sp_simplify_molecule_id_settings_create.sql
 mariadb -D "$DBNAME" -vvv --show-warnings < sp.species_isolates_update_sorts_create.sql
 mariadb -D "$DBNAME" -vvv --show-warnings < sp.NCBI_linkout_ft_export_create.sql
+mariadb -D "$DBNAME" -vvv --show-warnings < sp.taxonomy_node_compute_indexes_create.sql
+mariadb -D "$DBNAME" -vvv --show-warnings < sp.rebuild_node_merge_split_create.sql
 
 # Triggers
 # Not yet created
 # mariadb -D "$DBNAME" -vvv --show-warnings < tr.TR_taxonomy_node_UPDATE_indexes.sql
-
-# Update SPs with errors that need to be checked:
-# mariadb -D "$DBNAME" -vvv --show-warnings < sp.taxonomy_node_compute_indexes_create.sql
-# mariadb -D "$DBNAME" -vvv --show-warnings < sp.rebuild_node_merge_split_create.sql
-# mariadb -D "$DBNAME" -vvv --show-warnings < sp.NCBI_linkout_ft_export_create.sql
 
 # Run SPs to populate taxonomy_json and taxonomy_json_rank
 mariadb -D "$DBNAME" -vvv --show-warnings < populate_taxonomy_json_rank.sql
