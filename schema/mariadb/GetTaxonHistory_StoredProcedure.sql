@@ -269,7 +269,6 @@ BEGIN
          WHEN filteredTaxa.taxnode_id = taxNodeID THEN 1 ELSE 0
       END AS is_selected,
       filteredTaxa.is_split,
-      filteredTaxa.left_idx,
       filteredTaxa.lineage_ids,
       filteredTaxa.lineage_names,
       filteredTaxa.lineage_ranks,
@@ -321,10 +320,9 @@ BEGIN
       filteredTaxa.tree_id,
 
       -- Release columns
-      filteredTaxa.release_is_abolished,
       filteredTaxa.release_is_current,
-      filteredTaxa.release_is_selected,
-      filteredTaxa.release_mods,
+      filteredTaxa.release_is_visible,
+      filteredTaxa.release_number,
       CONCAT(
          CASE WHEN realms > 0 THEN 'realm,' ELSE '' END,  
          CASE WHEN subrealms > 0 THEN 'subrealm,' ELSE '' END,  
@@ -341,7 +339,7 @@ BEGIN
          CASE WHEN genera > 0 THEN 'genus,' ELSE '' END,  
          CASE WHEN subgenera > 0 THEN 'subgenus,' ELSE '' END,  
          CASE WHEN msl.species > 0 THEN 'species' ELSE '' END  
-      ) AS release_rank_names, 
+      ) AS release_rank_names,
       SUBSTRING(msl.notes, 1, 255) AS release_title,  
       msl.year AS release_year
 
@@ -370,28 +368,30 @@ BEGIN
          tree_id,
 
          -- Release columns
-         releases.mods AS release_mods,
-         releases.is_abolished AS release_is_abolished,
          releases.is_current AS release_is_current,
-         releases.is_selected AS release_is_selected
+         CASE 
+            WHEN releases.is_current = 1 OR releases.mods > 0 THEN 1 ELSE 0
+         END AS release_is_visible,
+         releases.msl_release_num AS release_number
 
       FROM taxaChanges tc1
 
       -- Releases that are current, associated with the selected taxon, or have at least one modification.
       JOIN (
          SELECT
-            tc2.msl_release_num,
-            SUM(tc2.modifications) AS mods,
+            CASE 
+	         	WHEN 0 < SUM(CASE WHEN tc2.taxnode_id = taxNodeID THEN 1 ELSE 0 END) THEN 1 ELSE 0 
+	         END AS has_selected_taxon,
             CASE WHEN tc2.msl_release_num = currentMSL THEN 1 ELSE 0 END AS is_current,
-	         CASE WHEN tc2.is_deleted = 1 THEN 1 ELSE 0 END AS is_abolished,
-            MAX(CASE WHEN tc2.taxnode_id = taxNodeID THEN 1 ELSE 0 END) AS is_selected
+            SUM(tc2.modifications) AS mods,
+            tc2.msl_release_num
          FROM taxaChanges tc2
          GROUP BY tc2.msl_release_num
       ) releases ON (
      	   releases.msl_release_num = tc1.msl_release_num
      	   AND (releases.is_current = 1 
             OR releases.mods > 0 
-            OR (releases.is_selected = 1 AND tc1.taxnode_id = taxNodeID)
+            OR (releases.has_selected_taxon = 1 AND tc1.taxnode_id = taxNodeID)
      	   )
       )
    ) filteredTaxa
