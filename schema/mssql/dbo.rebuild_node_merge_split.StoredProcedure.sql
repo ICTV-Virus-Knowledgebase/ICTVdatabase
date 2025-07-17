@@ -8,6 +8,7 @@ GO
 SET QUOTED_IDENTIFIER ON
 GO
 
+
 CREATE procedure [dbo].[rebuild_node_merge_split]
 AS
 
@@ -17,10 +18,34 @@ AS
 	truncate table taxonomy_node_merge_split
 
 	-- ***************************
-	-- add forward links
+	-- add identities (dist=0)
+	-- ***************************
+	insert into taxonomy_node_merge_split
+	select 
+		prev_ictv_id=ictv_id
+		, next_ictv_id=ictv_id
+		, is_merged=0
+		, is_split=0
+		, is_recreated=0
+		, dist=0
+		, rev_count=0
+	from taxonomy_node
+	where msl_release_num is not null
+	and is_hidden=0
+	group by ictv_id
+
+	-- ***************************
+	-- add forward links (dist=1)
 	-- ***************************
 	insert into taxonomy_node_merge_split 
-	select prev_ictv_id=p.ictv_id, next_ictv_id=n.ictv_id, d.is_merged, d.is_split, dist=1, rev_count=0
+	select 
+		prev_ictv_id=p.ictv_id
+		, next_ictv_id=n.ictv_id
+		, d.is_merged
+		, d.is_split
+		, is_recreated=0
+		, dist=1
+		, rev_count=0
 	from taxonomy_node_delta d 
 	join taxonomy_node p on d.prev_taxid=p.taxnode_id
 	join taxonomy_node n on d.new_taxid=n.taxnode_id
@@ -30,25 +55,17 @@ AS
 	and p.is_hidden=0 and n.is_hidden=0
 
 	-- ***************************
-	-- add identities
-	-- ***************************
-	insert into taxonomy_node_merge_split
-	select 
-		prev_ictv_id=ictv_id
-		, next_ictv_id=ictv_id
-		, is_merged=0
-		, is_split=0
-		, dist=0
-		, rev_count=0
-	from taxonomy_node
-	where msl_release_num is not null
-	and is_hidden=0
-	group by ictv_id
-	-- ***************************
-	-- add reverse links
+	-- add reverse links (dist=1)
 	-- ***************************
 	insert into taxonomy_node_merge_split 
-	select prev_ictv_id=n.ictv_id, next_ictv_id=p.ictv_id, d.is_merged, d.is_split, dist=1, rev_count=1
+	select 
+		prev_ictv_id=n.ictv_id
+		, next_ictv_id=p.ictv_id
+		, d.is_merged
+		, d.is_split
+		, is_recreated=0
+		, dist=1
+		, rev_count=1
 	from taxonomy_node_delta d 
 	join taxonomy_node p on d.prev_taxid=p.taxnode_id
 	join taxonomy_node n on d.new_taxid=n.taxnode_id
@@ -56,6 +73,33 @@ AS
 	where p.ictv_id <> n.ictv_id
 	and p.msl_release_num = n.msl_release_num-1
 	and p.is_hidden=0 and n.is_hidden=0
+
+	-- ***************************
+	-- add resurection links (dist=1): both forwards and backwards
+	-- ***************************
+	-- example: 
+	--    MSL4-5      Acute bee paralysis virus, ictv_id=19760317
+    --    MSL22-40    Acute bee paralysis virus, ictv_id=20040961
+	insert into taxonomy_node_merge_split 
+	select 
+		prev_ictv_id	= (case direction.rev_count when 0 then early.ictv_id when 1 then late.ictv_id  end)
+		, next_ictv_id	= (case direction.rev_Count when 0 then late.ictv_id  when 1 then early.ictv_id end)
+		, is_merged		= 0
+		, is_split		= 0
+		, is_recreated	= 1
+		, dist			= 1
+		, rev_count		= direction.rev_count
+		-- report='RESURECTIONS: Abolished and re-created later', 
+		-- early_msl=early.msl_release_num, early_prop=early.next_proposal,  early.next_tags, early.ictv_id,
+		-- early_name=early.name, late_name=late.name,
+		--late.ictv_id, late.prev_tags, late_prop=late.prev_proposal, late_msl= late.msl_release_num
+	from (select rev_count=0 union select rev_count=1) as direction,
+		 taxonomy_node_dx early
+	join taxonomy_node_dx late on late.name =early.name and late.prev_tags like '%New%' 
+	and late.msl_release_num > early.msl_release_num and late.ictv_id <> early.ictv_id
+	and early.level_id = late.level_id
+	where early.next_tags like '%Abolish%'
+	order by early.msl_release_num, early.name
 
 	/*****************************
 	 * compute closure 
@@ -66,16 +110,18 @@ AS
 			prev_ictv_id, next_ictv_id
 			, is_merged=max(is_merged)
 			, is_split=max(is_split)
+			, is_recreated=max(is_recreated)
 			, dist=min(dist)
 			, rev_count=sum(rev_count)
 		from (
 			select 
 				p.prev_ictv_id
 				, n.next_ictv_id
-				,is_merged=(p.is_merged+n.is_merged)
-				,is_split =(p.is_split +n.is_split)
-				,dist     =(p.dist     +n.dist)
-				,rev_count=(p.rev_count+n.rev_count)
+				,is_merged		=(p.is_merged	+ n.is_merged)
+				,is_split		=(p.is_split	+ n.is_split)
+				,is_recreated	=(p.is_recreated+ n.is_recreated)
+				,dist			=(p.dist		+ n.dist)
+				,rev_count		=(p.rev_count	+ n.rev_count)
 			from taxonomy_node_merge_split p
 			join taxonomy_node_merge_split n on (
 				p.next_ictv_id = n.prev_ictv_id
@@ -111,4 +157,8 @@ AS
 
 	select 'TEST', * from taxonomy_node_merge_split 
 	where next_ictV_id =20093515
+
+	select 'TEST RECREATED: Acute bee paralysis virus', * from taxonomy_node_merge_split 
+	where next_ictv_id in (19760317,20040961) order by dist, rev_count
 GO
+

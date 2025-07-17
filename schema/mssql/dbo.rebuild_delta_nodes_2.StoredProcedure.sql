@@ -1,7 +1,7 @@
-USE [ICTVonline40]
+
 GO
 
-/****** Object:  StoredProcedure [dbo].[rebuild_delta_nodes_2]    Script Date: 6/18/2025 7:16:23 PM ******/
+
 SET ANSI_NULLS ON
 GO
 
