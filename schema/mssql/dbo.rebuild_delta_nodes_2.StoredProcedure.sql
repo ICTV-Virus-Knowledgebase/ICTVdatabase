@@ -265,6 +265,12 @@ AS
 	--
 	-- MOVED - deltas between nodes with changed parents
 	--
+	-- For merges, Elliot would use LINEAGE_UPDATED. 
+	-- For splits where the lower rank taxon stays with its historic parent (same ictv_id), then I would again use LINEAGE_UPDATED. 
+	--	   But, if the lower rank goes with a newly created or renamed parent (diff ictv_id), then I would use MOVE. 
+	--
+	-- mostly this boilds down to what chagne verb, and whether parent ictv_id is the same. 
+	--
 	-- still set proposal, in case of attribute change (is_ref, etc)
 	-- ******************************************************************************************************
 	--DECLARE @msl INTEGER; SET @msl=38 -- debug
@@ -294,18 +300,18 @@ AS
 			(case when prev_parent.ictv_id <> next_parent.ictv_id then 1 else 0 end)
 			*(case when  prev_node.out_change like '%promot%' then 0 else 1 end)
 			*(case when  prev_node.out_change like '%demot%'  then 0 else 1 end)
-			*(case when parent_delta.is_merged = 1 then (case when prev_parent.name <> next_parent.name then 1 else 0 end) else 1 end)
-			*(case when parent_delta.is_split = 1 then (case when prev_parent.name <> next_parent.name then 1 else 0 end) else 1 end)
+			*(case when parent_delta.is_merged = 1 then 0 else 1 end)
+			*(case when parent_delta.is_split = 1 then (case when prev_parent.ictv_id <> next_parent.ictv_id then 1 else 0 end) else 1 end)
 			*(case when prev_parent.level_id=100 and next_parent.level_id=100 then  0  else 1 end)
 		-- if we set the flag AND debug-in-notes mode, then pre-pend notes with prefix/tag
 		, notes = (case 
-				-- multipying 0/1 ints, gives logical AND - if any of these is 0, the whole is 0
-				(case when prev_parent.ictv_id <> next_parent.ictv_id then 1 else 0 end)
-				*(case when  prev_node.out_change like '%promot%' then 0 else 1 end)
-				*(case when  prev_node.out_change like '%demot%'  then 0 else 1 end)
-				*(case when parent_delta.is_merged = 1 then (case when prev_parent.name <> next_parent.name then 1 else 0 end) else 1 end)
-				*(case when parent_delta.is_split = 1 then (case when prev_parent.name <> next_parent.name then 1 else 0 end) else 1 end)
-				*(case when prev_parent.level_id=100 and next_parent.level_id=100 then  0  else 1 end)
+			-- multipying 0/1 ints, gives logical AND - if any of these is 0, the whole is 0
+			(case when prev_parent.ictv_id <> next_parent.ictv_id then 1 else 0 end)
+			*(case when  prev_node.out_change like '%promot%' then 0 else 1 end)
+			*(case when  prev_node.out_change like '%demot%'  then 0 else 1 end)
+			*(case when parent_delta.is_merged = 1 then 0 else 1 end)
+			*(case when parent_delta.is_split = 1 then (case when prev_parent.ictv_id <> next_parent.ictv_id then 1 else 0 end) else 1 end)
+			*(case when prev_parent.level_id=100 and next_parent.level_id=100 then  0  else 1 end)
 			when 1 then isnull('['+@debug_notes+'SET MOVED=1];','')+taxonomy_node_delta.notes
 			else taxonomy_node_delta.notes
 			end)
