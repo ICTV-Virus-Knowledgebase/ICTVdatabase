@@ -10,9 +10,12 @@ GO
 
 
 
+
+
 CREATE procedure [dbo].[rebuild_delta_nodes_2]
 	@msl int = NULL,		 -- delete related deltas first
-	@debug_taxid int = NULL  -- debugging - only deltas going INTO that node
+	@debug_taxid int = NULL,  -- debugging - only deltas going INTO that node
+	@debug_notes varchar(20) = NULL -- add debugging info to [notes]
 AS
 
 	-- -----------------------------------------------------------------------------
@@ -54,7 +57,7 @@ AS
 		msl=n.msl_release_num
 		, p.taxnode_id, n.taxnode_id
 		, proposal=n.in_filename
-		, notes   =n.in_notes
+		, notes   = isnull('['+@debug_notes+'NEW/SPLIT];','')+n.in_notes
 		, is_new=(case when n.in_change='new' then 1 else 0 end)
 		, is_split=(case when n.in_change='split' then 1 else 0 end)
 		, is_now_type = (case
@@ -96,7 +99,8 @@ AS
 	--select prev_taxid, new_taxid, count(*) from (
 	-- add rename/moved empirally
 	select 
-		src.msl, src.prev_taxid, src.new_taxid, src.proposal, src.notes
+		src.msl, src.prev_taxid, src.new_taxid, src.proposal
+		, notes = isnull('['+@debug_notes+'RENAME,MERGE,PROMOTE,MOVE,ABOLISH];','')+src.notes
 		, is_renamed =         (case when prev_msl.name <> next_msl.name and is_merged = 0 then 1 else 0 end)
 		, src.is_merged
 		, is_lineage_updated = (case when prev_pmsl.lineage <> next_pmsl.lineage AND (prev_pmsl.level_id<>100/*root*/ or next_pmsl.level_id <> 100/*root*/) then 1 else 0 end)
@@ -111,6 +115,7 @@ AS
 			else 0 end)
 		, src.is_abolish
 	from (
+		-- DECLARE @msl int; SET @msl=6
 		select distinct
 			msl=p.msl_release_num+1
 			,prev_taxid=p.taxnode_id
@@ -168,6 +173,7 @@ AS
 		--and p.taxnode_id=19820086 -- TEST: 'Unassigned;Iridoviridae;Unassigned;African swine fever virus group (target=species, but genus is moved)
 		--and p.msl_release_num=11	and p.name like 'Influenza type C virus%'
 		--and p.taxnode_id in (19900137, 19900770) -- 'Influenza C virus' genus/species ambiguity heuristic resolution (msl 11-12)
+		--and p.taxnode_id in (19780900) -- 5	19780900	Influenza type C	ICTV19870116	rename	missing	Orthomyxoviridae;Influenza virus C
 	) as src
 	join taxonomy_node prev_msl on prev_msl.taxnode_id = src.prev_taxid
 	join taxonomy_node prev_pmsl on prev_pmsl.taxnode_id = prev_msl.parent_id
@@ -196,7 +202,7 @@ AS
 		, prev_taxid=p.taxnode_id
 		, new_taxid=n.taxnode_id
 		, proposal=p.out_filename
-		, notes=p.out_notes
+		, notes= isnull('['+@debug_notes+'NO CHANGE];','')+p.out_notes 
 		, is_lineage_updated = (case when pp.lineage <> pn.lineage AND pp.level_id<>100/*root*/ then 1 else 0 end)
 		, is_promoted =        (case when p.level_id > n.level_id then 1 else 0 end)
 		, is_demoted =         (case when p.level_id < n.level_id then 1 else 0 end)
@@ -284,12 +290,27 @@ AS
 		, [CONCLUSION]='CONCLUSION>>',
 	*/  
 		is_moved = 
+			-- multipying 0/1 ints, gives logical AND - if any of these is 0, the whole is 0
 			(case when prev_parent.ictv_id <> next_parent.ictv_id then 1 else 0 end)
 			*(case when  prev_node.out_change like '%promot%' then 0 else 1 end)
-			*(case when  next_node.out_change like '%demot%' then 0 else 1 end)
+			*(case when  prev_node.out_change like '%demot%'  then 0 else 1 end)
 			*(case when parent_delta.is_merged = 1 then (case when prev_parent.name <> next_parent.name then 1 else 0 end) else 1 end)
 			*(case when parent_delta.is_split = 1 then (case when prev_parent.name <> next_parent.name then 1 else 0 end) else 1 end)
 			*(case when prev_parent.level_id=100 and next_parent.level_id=100 then  0  else 1 end)
+		-- if we set the flag AND debug-in-notes mode, then pre-pend notes with prefix/tag
+		, notes = (case 
+				-- multipying 0/1 ints, gives logical AND - if any of these is 0, the whole is 0
+				(case when prev_parent.ictv_id <> next_parent.ictv_id then 1 else 0 end)
+				*(case when  prev_node.out_change like '%promot%' then 0 else 1 end)
+				*(case when  prev_node.out_change like '%demot%'  then 0 else 1 end)
+				*(case when parent_delta.is_merged = 1 then (case when prev_parent.name <> next_parent.name then 1 else 0 end) else 1 end)
+				*(case when parent_delta.is_split = 1 then (case when prev_parent.name <> next_parent.name then 1 else 0 end) else 1 end)
+				*(case when prev_parent.level_id=100 and next_parent.level_id=100 then  0  else 1 end)
+			when 1 then isnull('['+@debug_notes+'SET MOVED=1];','')+taxonomy_node_delta.notes
+			else taxonomy_node_delta.notes
+			end)
+
+
 	from taxonomy_node_delta 
 	left outer join taxonomy_node_names prev_node on taxonomy_node_delta.prev_taxid = prev_node.taxnode_id -- N=24
 	left outer join taxonomy_node prev_parent on prev_parent.taxnode_id = prev_node.parent_id -- N=24
@@ -321,7 +342,10 @@ AS
 	-- ******************************************************************************************************
 	--
 	-- MERGED - update "sibling" deltas - if one delta going into a taxon has is_merged=1, then they all should
-	--
+	--     
+	--     if the sibling was a "rename", then upgrade it to a merge
+	--			( ie, also set is_rename = 0 , so as not to confuse the display code)
+	-- 
 	-- still set proposal, in case of attribute change (is_ref, etc)
 	-- ******************************************************************************************************
 	-- declare @msl int; declare @debug_taxid int; set @msl= 18 -- debug
@@ -331,9 +355,12 @@ AS
 	select 
 		taxonomy_node_delta.*, '|||', msrc.*, '>>>>',
 	 --*/ 
+		-- add merged to all deltas who dont' have it (if N:1)
 		is_merged = 1,
+		-- remove other flags (essentially upgrade a rename to merge
+		is_renamed = 0,
 		proposal = msrc.proposal,
-		notes = msrc.notes
+		notes = isnull('['+@debug_notes+'UPGRADE_TO_MERGE];','')+msrc.notes
 	from taxonomy_node_delta 
 	join (
 		select new_taxid, proposal=max(proposal), notes=max(notes)
@@ -347,7 +374,7 @@ AS
 	print '-- MSL_delta IS_MERGED: UPDATED'
 
 
-
+	/*
 	--
 	-- stats
 	--
@@ -371,14 +398,18 @@ AS
 	group by msl, tag_csv2
 	order by msl, tag_csv2
 	print '-- MSL_delta stats2'
-
+	*/
 	/*
 	-- TEST
 	exec rebuild_delta_nodes_2 38
 
 	-- DEBUG - build only deltas into a specific node, but delete all deltas for that MSL
 	exec rebuild_delta_nodes_2 18 19990680 -- 3 way merge, with main taxon retaining name
+
+	-- DEBUG_NOTES - add tags to taxonomy_node_delta.notes to explain WHY/HOW things were set
+	exec rebuild_delta_nodes_2 14, NULL, 'rebuild_delta_nodes:'
+	select [when]='after', report='13p2 reovirus (merge) + Chum slamon virus (rename) -> Group A aquareovirus',* from taxonomy_node_delta where new_taxid in (19951998)
+
 	*/
 GO
-
 
