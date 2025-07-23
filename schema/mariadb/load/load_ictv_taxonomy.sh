@@ -108,7 +108,7 @@ mariadb -D "$DBNAME" -vvv --show-warnings < view.view_taxa_level_counts_by_relea
 mariadb -D "$DBNAME" -vvv --show-warnings < view.view_taxonomy_stats_create.sql
 mariadb -D "$DBNAME" -vvv --show-warnings < view.virus_isolates_create.sql
 mariadb -D "$DBNAME" -vvv --show-warnings < view.vmr_export_create.sql
-
+mariadb -D "$DBNAME" -vvv --show-warnings < view.QC_generate_taxonomy_history_binned_test_cases_create.sql
 
 # add indexes
 mariadb -D "$DBNAME" -vvv --show-warnings < add_indexes.sql
