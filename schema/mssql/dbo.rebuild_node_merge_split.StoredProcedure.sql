@@ -9,6 +9,7 @@ SET QUOTED_IDENTIFIER ON
 GO
 
 
+
 CREATE procedure [dbo].[rebuild_node_merge_split]
 AS
 
@@ -78,10 +79,13 @@ AS
 	-- add resurection links (dist=1): both forwards and backwards
 	-- ***************************
 	-- example: 
-	--    MSL4-5      Acute bee paralysis virus, ictv_id=19760317
-    --    MSL22-40    Acute bee paralysis virus, ictv_id=20040961
+	--    MSL4-5      Acute bee paralysis virus, ictv_id=19760317 (abolished)
+    --    MSL22-40    Acute bee paralysis virus, ictv_id=20040961 (new)
+	-- example: 
+	--    MSL6-12	  M'Poko virus, ictv_id=, (abolished)
+	--    MSL8-40       [MSL8.new]Yaba-1 virus[MSL28:rename]M'Poko virus[etc]
 	insert into taxonomy_node_merge_split 
-	select 
+	select distinct
 		prev_ictv_id	= (case direction.rev_count when 0 then early.ictv_id when 1 then late.ictv_id  end)
 		, next_ictv_id	= (case direction.rev_Count when 0 then late.ictv_id  when 1 then early.ictv_id end)
 		, is_merged		= 0
@@ -95,11 +99,12 @@ AS
 		--late.ictv_id, late.prev_tags, late_prop=late.prev_proposal, late_msl= late.msl_release_num
 	from (select rev_count=0 union select rev_count=1) as direction,
 		 taxonomy_node_dx early
-	join taxonomy_node_dx late on late.name =early.name and late.prev_tags like '%New%' 
+	join taxonomy_node_dx late on late.name =early.name --and late.prev_tags like '%New%' 
 	and late.msl_release_num > early.msl_release_num and late.ictv_id <> early.ictv_id
 	and early.level_id = late.level_id
-	where early.next_tags like '%Abolish%'
-	order by early.msl_release_num, early.name
+	--where early.next_tags like '%Abolish%'
+	and not exists (select * from taxonomy_node_merge_split ms where ms.prev_ictv_id=early.ictv_id and ms.next_ictv_id=late.ictv_id)
+	--order by early.msl_release_num, early.name
 
 	/*****************************
 	 * compute closure 
