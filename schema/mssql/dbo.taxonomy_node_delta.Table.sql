@@ -12,7 +12,7 @@ CREATE TABLE [dbo].[taxonomy_node_delta](
 	[prev_taxid] [int] NULL,
 	[new_taxid] [int] NULL,
 	[proposal] [varchar](255) NULL,
-	[notes] [varchar](255) NULL,
+	[notes] [nvarchar](max) NULL,
 	[is_merged] [int] NOT NULL,
 	[is_split] [int] NOT NULL,
 	[is_moved] [int] NOT NULL,
@@ -27,7 +27,7 @@ CREATE TABLE [dbo].[taxonomy_node_delta](
 	[msl] [int] NOT NULL,
 	[tag_csv2]  AS (((((((((case when [is_merged]=(1) then 'Merged,' else '' end+case when [is_split]=(1) then 'Split,' else '' end)+case when [is_renamed]=(1) then 'Renamed,' else '' end)+case when [is_new]=(1) then 'New,' else '' end)+case when [is_deleted]=(1) then 'Abolished,' else '' end)+case when [is_moved]=(1) then 'Moved,' else '' end)+case when [is_promoted]=(1) then 'Promoted,' else '' end)+case when [is_demoted]=(1) then 'Demoted,' else '' end)+case when [is_now_type]=(1) then 'Assigned as Type Species,' when [is_now_type]=(-1) then 'Removed as Type Species,' else '' end)+case when [is_lineage_updated]=(1) then 'LineageUpdated,' else '' end) PERSISTED NOT NULL,
 	[tag_csv_min]  AS (((((((case when [is_merged]=(1) then 'Merged,' else '' end+case when [is_split]=(1) then 'Split,' else '' end)+case when [is_renamed]=(1) then 'Renamed,' else '' end)+case when [is_new]=(1) then 'New,' else '' end)+case when [is_deleted]=(1) then 'Abolished,' else '' end)+case when [is_moved]=(1) then 'Moved,' else '' end)+case when [is_promoted]=(1) then 'Promoted,' else '' end)+case when [is_demoted]=(1) then 'Demoted,' else '' end) PERSISTED NOT NULL
-) ON [PRIMARY]
+) ON [PRIMARY] TEXTIMAGE_ON [PRIMARY]
 GO
 
 ALTER TABLE [dbo].[taxonomy_node_delta] ADD  CONSTRAINT [DF_taxonomy_node_delta_prev_taxid]  DEFAULT (NULL) FOR [prev_taxid]
