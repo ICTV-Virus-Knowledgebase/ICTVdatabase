@@ -12,6 +12,7 @@ GO
 
 
 
+
 CREATE procedure [dbo].[rebuild_delta_nodes_2]
 	@msl int = NULL,		 -- delete related deltas first
 	@debug_taxid int = NULL,  -- debugging - only deltas going INTO that node
@@ -28,9 +29,11 @@ AS
 	-- -----------------------------------------------------------------------------
 	--
 	-- 20210505 curtish (Issue #5): obsolete is_now_type when MSL > 35, then add it back in
+	-- 20250718 curtish: ADD COLLATE SQL_Latin1_General_CP1_CS_AS (and make taxonomy_node.name COLLATE SQL_Latin1_General_CP1_CI_AS
 	--   declare @msl int; declare @debug_taxid int
 	--   declare @msl int; declare @debug_taxid int; set @msl=18
 	set @msl=(select isnull(@msl,MAX(msl_release_num)) from taxonomy_node)
+
 	select 'TARGET MSL: ',@msl
 	print '-- TARGET_MSL: '+rtrim(@MSL)
 	-- ******************************************************************************************************
@@ -76,7 +79,7 @@ AS
 	left outer join taxonomy_node p on 
 		p.msl_release_num = n.msl_release_num-1
 		and 
-		n.in_target in (p.lineage, p.name)
+		n.in_target COLLATE SQL_Latin1_General_CP1_CS_AS in (p.lineage, p.name) 
 	left outer join taxonomy_node_delta d on d.new_taxid=n.taxnode_id
 	where 
 		n.in_change in ('new', 'split')
@@ -101,9 +104,9 @@ AS
 	select 
 		src.msl, src.prev_taxid, src.new_taxid, src.proposal
 		, notes = isnull('['+@debug_notes+'RENAME,MERGE,PROMOTE,MOVE,ABOLISH];','')+src.notes
-		, is_renamed =         (case when prev_msl.name <> next_msl.name and is_merged = 0 then 1 else 0 end)
+		, is_renamed =         (case when prev_msl.name <> next_msl.name COLLATE SQL_Latin1_General_CP1_CS_AS and is_merged = 0 then 1 else 0 end)
 		, src.is_merged
-		, is_lineage_updated = (case when prev_pmsl.lineage <> next_pmsl.lineage AND (prev_pmsl.level_id<>100/*root*/ or next_pmsl.level_id <> 100/*root*/) then 1 else 0 end)
+		, is_lineage_updated = (case when prev_pmsl.lineage <> next_pmsl.lineage COLLATE SQL_Latin1_General_CP1_CS_AS AND (prev_pmsl.level_id<>100/*root*/ or next_pmsl.level_id <> 100/*root*/) then 1 else 0 end)
 		, is_promoted =        (case when prev_msl.level_id > next_msl.level_id then 1 else 0 end)
 		, is_demoted =         (case when prev_msl.level_id < next_msl.level_id then 1 else 0 end)
 		, is_now_type = (case
@@ -148,22 +151,22 @@ AS
 		left outer join taxonomy_node targ on 
 			p.msl_release_num = targ.msl_release_num-1
 			and (
-				p.out_target in (targ.lineage, targ.name)
+				p.out_target COLLATE SQL_Latin1_General_CP1_CS_AS in (targ.lineage, targ.name)
 				or
-				p._out_target_name = targ.name
+				p._out_target_name COLLATE SQL_Latin1_General_CP1_CS_AS = targ.name
 			)
 			and 
 			p.is_deleted = 0
 		-- allow match to child of target (ie, target is new genus for a species)
 		left outer join taxonomy_node targ_child on 
 			targ_child.parent_id = targ.taxnode_id
-			and (targ_child.name = p.name or targ_child.name = p.out_target)
+			and (targ_child.name = p.name COLLATE SQL_Latin1_General_CP1_CS_AS or targ_child.name = p.out_target COLLATE SQL_Latin1_General_CP1_CS_AS)
 			and targ_child.level_id = p.level_id
 			and p.out_change <> 'promote'
 			and targ_child.name <> 'Unassigned'
 			and targ_child.name is not null
 			and targ_child.is_hidden = 0
-			--and targ_child.name <> targ.name
+			--and targ_child.name <> targ.name COLLATE SQL_Latin1_General_CP1_CS_AS
 		left outer join taxonomy_node_delta d on d.prev_taxid=p.taxnode_id
 		where p.out_change is not null --in ('new', 'split')
 		and p.msl_release_num = (@msl-1)
@@ -203,7 +206,7 @@ AS
 		, new_taxid=n.taxnode_id
 		, proposal=p.out_filename
 		, notes= isnull('['+@debug_notes+'NO CHANGE];','')+p.out_notes 
-		, is_lineage_updated = (case when pp.lineage <> pn.lineage AND pp.level_id<>100/*root*/ then 1 else 0 end)
+		, is_lineage_updated = (case when pp.lineage <> pn.lineage COLLATE SQL_Latin1_General_CP1_CS_AS AND pp.level_id<>100/*root*/ then 1 else 0 end)
 		, is_promoted =        (case when p.level_id > n.level_id then 1 else 0 end)
 		, is_demoted =         (case when p.level_id < n.level_id then 1 else 0 end)
 		, is_now_type =        (case
@@ -224,7 +227,7 @@ AS
 				(n.lineage = p.lineage)
 				or
 				-- same non-NULL, non-Unassigned names, same level (species, genus, etc)
-				(n.name = p.name AND n.name<>'Unassigned' AND n.level_id=p.level_id)
+				(n.name = p.name COLLATE SQL_Latin1_General_CP1_CS_AS AND n.name<>'Unassigned' AND n.level_id=p.level_id)
 				or 
 				-- root of tree (special case)
 				(n.level_id = 100 AND p.level_id = 100)
@@ -328,8 +331,8 @@ AS
 	and (
 		-- nodes that are potentially a move
 		prev_node.out_change like '%move%' 
-		or (parent_delta.is_merged = 1 and  prev_parent.name <> next_parent.name)
-		or (parent_delta.is_split = 1 and prev_parent.name <> next_parent.name)
+		or (parent_delta.is_merged = 1 and  prev_parent.name <> next_parent.name COLLATE SQL_Latin1_General_CP1_CS_AS)
+		or (parent_delta.is_split = 1 and prev_parent.name <> next_parent.name COLLATE SQL_Latin1_General_CP1_CS_AS)
 		or prev_parent.ictv_id <> next_parent.ictv_id
 		  --or prev_parent.name = 'Viunavirus' or next_parent.name='Kuttervirus' -- MSL36 merge
 	)
