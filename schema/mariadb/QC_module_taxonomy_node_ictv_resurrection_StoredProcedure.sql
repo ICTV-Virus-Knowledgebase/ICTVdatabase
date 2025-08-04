@@ -1,139 +1,145 @@
 /* ================================================================
    Stored procedure  : QC_module_taxonomy_node_ictv_resurrection
-   Converted from    : SQL-Server to MariaDB
-   Behaviour         : Same result-set, same default parameter
-   Tested on         : MariaDB 10.11
+   Converted from    : SQL-Server to MariaDB on 08042025
    ================================================================ */
-DELIMITER $$
 
-DROP PROCEDURE IF EXISTS QC_module_taxonomy_node_ictv_resurrection $$
+DELIMITER //
+
+DROP PROCEDURE IF EXISTS QC_module_taxonomy_node_ictv_resurrection //
 CREATE PROCEDURE QC_module_taxonomy_node_ictv_resurrection
 (
-    IN p_filter VARCHAR(1000)        -- pass NULL ⇒ default 'ERROR%'
+    IN  p_filter      VARCHAR(1000),
+    IN  p_target_name VARCHAR(100)
 )
 BEGIN
-    DECLARE v_current_msl INT;
-    /* -----------------------------------------------------------------
-       SQL-Server allowed a default in the header.
-       Give the same behaviour here.
-       ----------------------------------------------------------------- */
-    IF p_filter IS NULL THEN
-        SET p_filter := 'ERROR%';
-    END IF;
+	IF p_filter IS NULL      THEN SET p_filter      := 'ERROR%'; END IF;
+/* ------------------------------------------------------------------
+   (LRM 07172025) ICTV_ID issues
+   Identify ([rank],[name]) associated with multiple [ictv_id]’s
+   – re-ported from SQL Server to MariaDB
+   ------------------------------------------------------------------
+   Tests you can run:
+     CALL QC_module_taxonomy_node_ictv_resurrection();                     -- hard errors
+     CALL QC_module_taxonomy_node_ictv_resurrection('%', 'Zika virus');    -- one name
+     CALL QC_module_taxonomy_node_ictv_resurrection('%CASE%');             -- case problems
+------------------------------------------------------------------- */
 
-    /* -----------------------------------------------------------------
-       Cache current MSL once – reused several times.
-       ----------------------------------------------------------------- */
-    SELECT MAX(msl_release_num) INTO v_current_msl
-      FROM taxonomy_toc;
+SELECT
+   'QC_module_taxonomy_node_ictv_resurrection' AS qc_module,   -- SQL Server used OBJECT_NAME(@@PROCID)
+   '[taxonomy_node]'                           AS table_name,
+   src.*                                       -- every column produced below
+FROM (
 
-    /* -----------------------------------------------------------------
-       Main query – structurally identical to T-SQL, adapted for MariaDB.
-       ----------------------------------------------------------------- */
-    SELECT
-        'QC_module_taxonomy_node_ictv_resurrection'          AS qc_module,
-        '[taxonomy_node]'                                    AS table_name,
-        src.*                                                /* all original columns */
-    FROM
-    (
-        /* -------------------------------------------------------------
-           Add OK / ERROR class labels & look-ahead ICTV-ID block
-           -------------------------------------------------------------*/
-        SELECT
-            a.*,
+  /* ---------------------------------------------------------------
+     pairs : each row holds the “prev” and “next” ICTV_ID slice for
+             the same [rank,name] where a gap exists
+  --------------------------------------------------------------- */
+  SELECT
+      pairs.*,
 
-            /* ------ build ‘class’ column (same logic as T-SQL) ------- */
-            CASE
-                WHEN a.max_msl = v_current_msl
-                     THEN 'CUR_MSL]]'
-                WHEN nl.ictv_id IS NULL
-                     THEN 'GAP>>'
-                ELSE '>>ADJ>>'
-            END                                             AS class,
+      /* ---------- QC message ------------------------------------ */
+      CONCAT_WS(
+          '',
+          /* CASE warning */
+          CASE
+            WHEN pairs.p_name COLLATE utf8mb4_bin
+               = pairs.n_name COLLATE utf8mb4_bin THEN ''
+            ELSE 'WARNING: CASE; '
+          END,
 
-            nl.ictv_id      AS next_ictv_id,
-            nl.min_msl      AS next_min_msl,
-            nl.max_msl      AS next_max_msl,
-            nl.msl_ct       AS next_msl_ct
-        FROM
-        (
-            /* =========================================================
-               UNDERLYING ANALYSIS – identical grouping logic
-               =========================================================*/
-            SELECT
-                /* constant message used in SQL-Server code */
-                'ERROR: ressurection of taxon with new ICTV_ID'
-                                                           AS qc_mesg,
+          /* linkage diagnostics */
+          CASE
+            WHEN pairs.link_ct = 0
+              THEN 'ERROR: NOT LINKED;'
+            WHEN pairs.link_ct = 1
+             AND pairs.p_out_change = 'abolish'
+             AND pairs.n_in_change = 'new'
+              THEN 'OK: linked new:abolish/new:...'
+            WHEN pairs.link_ct = 1
+              THEN CONCAT(
+                     'WARNING: linked, but ',
+                     IFNULL(pairs.p_out_change,'NULL'), ':',
+                     IFNULL(pairs.n_in_change,'NULL')
+                   )
+            WHEN pairs.link_ct > 1
+              THEN 'ERROR: link_ct > 1'
+            ELSE 'ERROR: unknown'
+          END
+      )                                                          AS qc_mesg
 
-                s.*,
+  FROM (
+      /* ==========================================================
+         Build the “prev” / “next” ranges for every [level_id,name]
+         that maps to *more than one* ICTV_ID
+      ========================================================== */
 
-                MIN(n.msl_release_num)  AS min_msl,
-                MAX(n.msl_release_num)  AS max_msl,
-                COUNT(n.ictv_id)        AS msl_ct
-            FROM
-            (
-                /* ---------------------------------------------
-                   Each (name, ictv_id) pair when the *name* is
-                   shared by >1 distinct ICTV-IDs (“zombie” names)
-                   ---------------------------------------------*/
-                SELECT
-                    z.name,
-                    z.ictv_ct,
-                    n.ictv_id
-                FROM taxonomy_node AS n
-                JOIN (
-                        SELECT name,
-                               COUNT(DISTINCT ictv_id) AS ictv_ct
-                        FROM taxonomy_node
-                        GROUP BY name
-                        HAVING COUNT(DISTINCT ictv_id) > 1
-                     ) AS z
-                  ON z.name = n.name
-                GROUP BY z.name, z.ictv_ct, n.ictv_id
-            ) AS s
-            JOIN taxonomy_node AS n
-              ON n.ictv_id = s.ictv_id
-            WHERE n.is_deleted = 0
-              AND n.is_obsolete = 0
-              AND n.msl_release_num IS NOT NULL
-            GROUP BY
-                  s.name, s.ictv_ct, s.ictv_id
-        ) AS a
+      /* ----- STEP 1: find names used by 2+ ICTV_IDs ------------- */
+      SELECT
+          n.level_id,
+          n.name,
+          COUNT(DISTINCT n.ictv_id)                AS ictv_ct
+      FROM taxonomy_node AS n
+      WHERE n.name = IFNULL(p_target_name, n.name)
+        AND n.name <> 'Unnamed genus'
+      GROUP BY n.level_id, n.name
+      HAVING COUNT(DISTINCT n.ictv_id) > 1
+  ) AS src
 
-        /* -------- look-ahead (next life) block -----------------------*/
-        LEFT JOIN
-        (
-            SELECT
-                t.name,
-                t.ictv_id,
-                MIN(n.msl_release_num) AS min_msl,
-                MAX(n.msl_release_num) AS max_msl,
-                COUNT(*)               AS msl_ct
-            FROM (
-                    SELECT name, ictv_id
-                    FROM taxonomy_node
-                    GROUP BY name, ictv_id
-                 ) AS t
-            JOIN taxonomy_node AS n
-              ON n.ictv_id = t.ictv_id
-            GROUP BY t.name, t.ictv_id
-        ) AS nl
-          ON nl.name    = a.name
-         AND nl.min_msl = a.max_msl + 1
-    ) AS src
-    /* -----------------------------------------------------------------
-       Keep only rows matching caller’s filter (‘ERROR%’ by default)
-       ----------------------------------------------------------------- */
-    WHERE src.qc_mesg LIKE p_filter
-    ORDER BY name, min_msl;
-END$$
+  /* ----- STEP 2: prev_range (earliest ICTV_ID slice) ----------- */
+  JOIN (
+      SELECT
+          n.level_id,
+          n.name,
+          n.ictv_id,
+          MIN(n.msl_release_num)                   AS min_msl,
+          MAX(n.msl_release_num)                   AS max_msl,
+          MIN(n.taxnode_id)                        AS min_taxnode_id,
+          MAX(n.taxnode_id)                        AS max_taxnode_id
+      FROM taxonomy_node AS n
+      GROUP BY n.level_id, n.ictv_id, n.name
+  ) AS prev_range
+    ON prev_range.level_id = src.level_id
+   AND prev_range.name     = src.name
+
+  /* latest row of that slice */
+  JOIN taxonomy_node AS pc
+    ON pc.taxnode_id = prev_range.max_taxnode_id
+
+  /* ----- STEP 3: next_range (later ICTV_ID slice) -------------- */
+  LEFT JOIN (
+      SELECT
+          n.level_id,
+          n.name,
+          n.ictv_id,
+          MIN(n.msl_release_num)                   AS min_msl,
+          MAX(n.msl_release_num)                   AS max_msl,
+          MIN(n.taxnode_id)                        AS min_taxnode_id,
+          MAX(n.taxnode_id)                        AS max_taxnode_id
+      FROM taxonomy_node AS n
+      GROUP BY n.level_id, n.ictv_id, n.name
+  ) AS next_range
+    ON next_range.level_id = src.level_id
+   AND next_range.name     = src.name
+
+  LEFT JOIN taxonomy_node AS nc
+    ON nc.taxnode_id = next_range.min_taxnode_id
+
+  /* ----- only gaps (prev.max < next.min) ----------------------- */
+  WHERE prev_range.max_msl < next_range.min_msl
+
+) AS pairs
+
+/* ---------------------------------------------------------------
+   Filters identical to SQL Server version
+--------------------------------------------------------------- */
+WHERE pairs.qc_mesg LIKE p_filter
+  AND pairs.name    LIKE IFNULL(p_target_name, pairs.name)
+
+ORDER BY
+  pairs.name,
+  pairs.p_min_msl, pairs.p_max_msl,
+  pairs.n_min_msl, pairs.n_max_msl;
+
+END //
+
 DELIMITER ;
-
--- /* default – show only rows whose qc_mesg starts with 'ERROR' */
--- CALL QC_module_taxonomy_node_ictv_resurrection();
-
--- /* list every row (pass '%' ) */
--- CALL QC_module_taxonomy_node_ictv_resurrection('%');
-
--- /* show only the “OK” rows (none, given this particular qc_mesg) */
--- CALL QC_module_taxonomy_node_ictv_resurrection('OK');
