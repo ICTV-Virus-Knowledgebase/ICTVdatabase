@@ -2,10 +2,18 @@
 CREATE INDEX idx_taxonomy_node_parent_level_tree ON taxonomy_node (parent_id, level_id, tree_id);
 CREATE INDEX idx_taxonomy_node_taxnode_tree ON taxonomy_node (taxnode_id, tree_id);
 CREATE INDEX idx_taxonomy_node_tree_level ON taxonomy_node (tree_id, level_id);
+-- Created to speed up speed up Release History page when it opens
 CREATE INDEX idx_node_hidden_msl_name_treelevel ON taxonomy_node (is_hidden, msl_release_num, name, tree_id, level_id);
 CREATE INDEX idx_tn_name ON taxonomy_node (name);
+-- Created by Don for Find the Species
 CREATE INDEX idx_tn_name_mslrelease ON taxonomy_node (name, msl_release_num);
+-- Created by Don for Find the Species
 CREATE INDEX idx_tn_tree_id ON taxonomy_node (tree_id);
+-- Created for searchTaxononmy SP to speed up searches
+CREATE INDEX idx_tn_allreleases_order ON taxonomy_node (is_hidden, is_deleted, msl_release_num, left_idx);
+-- Created as an additional speed boost for searchTaxonomy SP
+CREATE INDEX idx_tn_sibling_order ON taxonomy_node (parent_id, level_id, left_idx, taxnode_id);
+
 
 -- taxonomy_molecule
 CREATE INDEX abbrev ON taxonomy_molecule (abbrev);

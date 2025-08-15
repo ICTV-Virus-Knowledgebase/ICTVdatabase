@@ -1,6 +1,6 @@
-USE ICTVonline39;
-
 DELIMITER $$
+
+DROP PROCEDURE IF EXISTS searchTaxonomy $$
 
 CREATE PROCEDURE searchTaxonomy(
     IN currentMslRelease INT,
@@ -43,57 +43,74 @@ BEGIN
     -- on siblings, then picks the corresponding taxnode_id.
     -- In MariaDB, we can use a CTE or derived table. We'll use a CTE here.
 
-    WITH sibling_ranks AS (
-        SELECT 
-            s.taxnode_id,
-            s.parent_id,
-            s.level_id,
-            DENSE_RANK() OVER (PARTITION BY s.parent_id, s.level_id ORDER BY s.left_idx ASC) AS display_order
-        FROM taxonomy_node s
-        WHERE s.taxnode_id <> s.tree_id  -- exclude the tree node itself as in SQL Server logic
-    )
-
+    WITH base AS (
     SELECT
-        sr.display_order,
-        tn.ictv_id AS ictv_id,
-        REPLACE(IFNULL(tn.lineage, ''), ';', '>') AS lineage,
-        tn.parent_id AS parent_taxnode_id,
-        tl.name AS rank_name,
-        tn.msl_release_num AS release_number,
-        searchText AS search_text,
-        tn.taxnode_id AS taxnode_id,
+        tn.taxnode_id, tn.parent_id, tn.level_id, tn.left_idx, tn.tree_id,
+        tn.ictv_id, tn.lineage, tn.msl_release_num,
+        tl.name  AS rank_name,
+        tree.name AS tree_name,
         CONCAT(
             tn.tree_id,
-            IF(tn.realm_id IS NOT NULL, CONCAT(',', tn.realm_id), ''),
-            IF(tn.subrealm_id IS NOT NULL, CONCAT(',', tn.subrealm_id), ''),
-            IF(tn.kingdom_id IS NOT NULL, CONCAT(',', tn.kingdom_id), ''),
+            IF(tn.realm_id      IS NOT NULL, CONCAT(',', tn.realm_id), ''),
+            IF(tn.subrealm_id   IS NOT NULL, CONCAT(',', tn.subrealm_id), ''),
+            IF(tn.kingdom_id    IS NOT NULL, CONCAT(',', tn.kingdom_id), ''),
             IF(tn.subkingdom_id IS NOT NULL, CONCAT(',', tn.subkingdom_id), ''),
-            IF(tn.phylum_id IS NOT NULL, CONCAT(',', tn.phylum_id), ''),
-            IF(tn.subphylum_id IS NOT NULL, CONCAT(',', tn.subphylum_id), ''),
-            IF(tn.class_id IS NOT NULL, CONCAT(',', tn.class_id), ''),
-            IF(tn.subclass_id IS NOT NULL, CONCAT(',', tn.subclass_id), ''),
-            IF(tn.order_id IS NOT NULL, CONCAT(',', tn.order_id), ''),
-            IF(tn.suborder_id IS NOT NULL, CONCAT(',', tn.suborder_id), ''),
-            IF(tn.family_id IS NOT NULL, CONCAT(',', tn.family_id), ''),
-            IF(tn.subfamily_id IS NOT NULL, CONCAT(',', tn.subfamily_id), ''),
-            IF(tn.genus_id IS NOT NULL, CONCAT(',', tn.genus_id), ''),
-            IF(tn.subgenus_id IS NOT NULL, CONCAT(',', tn.subgenus_id), ''),
-            IF(tn.species_id IS NOT NULL, CONCAT(',', tn.species_id), '')
-        ) AS taxnode_lineage,
-        tn.tree_id AS tree_id,
-        tree.name AS tree_name
-    FROM taxonomy_node tn
-    JOIN taxonomy_level tl ON tl.id = tn.level_id
-    JOIN taxonomy_node tree ON tree.taxnode_id = tn.tree_id AND tree.msl_release_num IS NOT NULL
-    LEFT JOIN sibling_ranks sr ON sr.taxnode_id = tn.taxnode_id
-        AND sr.parent_id = tn.parent_id
-        AND sr.level_id = tn.level_id
-    WHERE tn.cleaned_name LIKE CONCAT('%', filteredSearchText, '%')
-      AND tn.is_hidden = 0
-      AND tn.is_deleted = 0
-      AND (includeAllReleases = TRUE OR tn.msl_release_num = selectedMslRelease)
-      AND tn.msl_release_num <= currentMslRelease
-    ORDER BY tn.tree_id DESC, tn.left_idx;
+            IF(tn.phylum_id     IS NOT NULL, CONCAT(',', tn.phylum_id), ''),
+            IF(tn.subphylum_id  IS NOT NULL, CONCAT(',', tn.subphylum_id), ''),
+            IF(tn.class_id      IS NOT NULL, CONCAT(',', tn.class_id), ''),
+            IF(tn.subclass_id   IS NOT NULL, CONCAT(',', tn.subclass_id), ''),
+            IF(tn.order_id      IS NOT NULL, CONCAT(',', tn.order_id), ''),
+            IF(tn.suborder_id   IS NOT NULL, CONCAT(',', tn.suborder_id), ''),
+            IF(tn.family_id     IS NOT NULL, CONCAT(',', tn.family_id), ''),
+            IF(tn.subfamily_id  IS NOT NULL, CONCAT(',', tn.subfamily_id), ''),
+            IF(tn.genus_id      IS NOT NULL, CONCAT(',', tn.genus_id), ''),
+            IF(tn.subgenus_id   IS NOT NULL, CONCAT(',', tn.subgenus_id), ''),
+            IF(tn.species_id    IS NOT NULL, CONCAT(',', tn.species_id), '')
+        ) AS taxnode_lineage
+    FROM taxonomy_node tn FORCE INDEX (idx_tn_allreleases_order)
+    JOIN taxonomy_level tl  ON tl.id = tn.level_id
+    JOIN taxonomy_node tree ON tree.taxnode_id = tn.tree_id
+    WHERE
+        tn.taxnode_id <> tn.tree_id
+        AND tn.is_hidden = 0
+        AND tn.is_deleted = 0
+        AND tn.msl_release_num <= currentMslRelease
+        AND (includeAllReleases OR tn.msl_release_num = COALESCE(selectedMslRelease, currentMslRelease))
+        AND tn.cleaned_name LIKE CONCAT('%', filteredSearchText, '%')
+    ),
+    parents AS (
+    SELECT DISTINCT parent_id, level_id
+    FROM base
+    ),
+    sibs AS (
+    SELECT
+        n.taxnode_id,
+        DENSE_RANK() OVER (
+            PARTITION BY n.parent_id, n.level_id
+            ORDER BY n.left_idx, n.taxnode_id
+        ) AS display_order
+    FROM taxonomy_node n
+    JOIN parents p
+        ON p.parent_id = n.parent_id
+    AND p.level_id  = n.level_id
+    WHERE
+        n.taxnode_id <> n.tree_id
+    )
+    SELECT
+    s.display_order,
+    b.ictv_id,
+    REPLACE(IFNULL(b.lineage,''), ';', '>') AS lineage,
+    b.parent_id AS parent_taxnode_id,
+    b.rank_name,
+    b.msl_release_num AS release_number,
+    searchText AS search_text,
+    b.taxnode_id,
+    b.taxnode_lineage,
+    b.tree_id,
+    b.tree_name
+    FROM base b
+    JOIN sibs s ON s.taxnode_id = b.taxnode_id
+    ORDER BY b.tree_id DESC, b.left_idx;
 
 END $$
 
