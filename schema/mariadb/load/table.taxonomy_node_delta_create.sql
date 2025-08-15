@@ -2,7 +2,7 @@ CREATE TABLE `taxonomy_node_delta`(
     `prev_taxid` INT NULL DEFAULT NULL,
     `new_taxid` INT NULL DEFAULT NULL,
     `proposal` VARCHAR(255) NULL DEFAULT NULL,
-    `notes` VARCHAR(255) NULL,
+    `notes` TEXT NULL,
     `is_merged` INT NOT NULL DEFAULT 0,
     `is_split` INT NOT NULL DEFAULT 0,
     `is_moved` INT NOT NULL DEFAULT 0,
