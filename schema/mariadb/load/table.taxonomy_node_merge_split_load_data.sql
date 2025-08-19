@@ -10,6 +10,7 @@ IGNORE 1 ROWS
   next_ictv_id,
   is_merged,
   is_split,
+  is_recreated,
   dist,
   rev_count
 );
