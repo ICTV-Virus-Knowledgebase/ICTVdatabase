@@ -11,6 +11,7 @@ GO
 CREATE TABLE [dbo].[taxonomy_toc](
 	[tree_id] [int] NOT NULL,
 	[msl_release_num] [int] NULL,
+	[version_tag] [varchar](50) NULL,
 	[comments] [varchar](max) NULL,
  CONSTRAINT [IX_taxonomy_toc-tree_id] UNIQUE NONCLUSTERED 
 (
