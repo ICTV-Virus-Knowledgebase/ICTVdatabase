@@ -8,6 +8,7 @@ IGNORE 1 ROWS
 (
   tree_id,
   msl_release_num,
+  version_tag,
   comments
 );
 
