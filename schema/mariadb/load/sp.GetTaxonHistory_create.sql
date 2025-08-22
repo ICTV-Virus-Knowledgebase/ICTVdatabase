@@ -1,11 +1,3 @@
-/* ================================================================
-   Stored procedure  : GetTaxonHistory  (MariaDB version)
-   Converted from    : SQL-Server
-   Used by			 : get-taxon-details service
-   Notes			 : This SP was created by Don to replace the
-   					   getTaxonReleaseHistory SP
-   ================================================================ */
-
 DROP PROCEDURE IF EXISTS `GetTaxonHistory`;
 
 
@@ -167,8 +159,24 @@ BEGIN
             ) AS modifications,
             node.msl_release_num,
             node.name,
-            prev_delta.notes AS prev_notes, 
-            prev_delta.proposal AS prev_proposal,  
+            prev_delta.notes AS prev_notes,
+            CASE
+               WHEN prev_delta.proposal IS NOT NULL
+                     THEN prev_delta.proposal
+               WHEN prev_delta.tag_csv2 <> '' THEN (
+                     SELECT d.proposal
+                     FROM   taxonomy_node_delta d
+                     JOIN   taxonomy_node       t ON d.new_taxid = t.taxnode_id
+                     WHERE  node.left_idx  > t.left_idx
+                        AND  node.right_idx < t.right_idx
+                        AND  node.tree_id   = t.tree_id
+                        AND  t.level_id  > 100
+                        AND  d.proposal IS NOT NULL
+                     ORDER BY t.level_id DESC
+                     LIMIT 1
+               )
+END AS prev_proposal,
+            -- prev_delta.proposal AS prev_proposal,
             node.taxnode_id AS taxnode_id,  
             node.tree_id AS tree_id
 
@@ -230,12 +238,28 @@ BEGIN
                CASE WHEN node.species_id IS NOT NULL THEN 'Species;' ELSE '' END 
             ) AS lineage_ranks,
             prev_delta.is_deleted AS modifications,
-            node.msl_release_num + 1 AS msl_release_num,
+            node.msl_release_num AS msl_release_num,
             node.name,
-            prev_delta.notes AS prev_notes, 
-            prev_delta.proposal AS prev_proposal,
+            prev_delta.notes AS prev_notes,
+            CASE
+               WHEN prev_delta.proposal IS NOT NULL
+                     THEN prev_delta.proposal
+               WHEN prev_delta.tag_csv2 <> '' THEN (
+                     SELECT d.proposal
+                     FROM   taxonomy_node_delta d
+                     JOIN   taxonomy_node       t ON d.new_taxid = t.taxnode_id
+                     WHERE  node.left_idx  > t.left_idx
+                        AND  node.right_idx < t.right_idx
+                        AND  node.tree_id   = t.tree_id
+                        AND  t.level_id  > 100
+                        AND  d.proposal IS NOT NULL
+                     ORDER BY t.level_id DESC
+                     LIMIT 1
+               )
+END AS prev_proposal,
+            -- prev_delta.proposal AS prev_proposal,
             node.taxnode_id AS taxnode_id,  
-            toc.tree_id
+            node.tree_id
 
          FROM taxonomy_node_x AS node  
          JOIN taxonomy_node_delta AS prev_delta ON (
