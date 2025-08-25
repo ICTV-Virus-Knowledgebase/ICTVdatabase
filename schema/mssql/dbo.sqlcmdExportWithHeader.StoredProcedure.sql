@@ -8,11 +8,13 @@ GO
 SET QUOTED_IDENTIFIER ON
 GO
 
+
 CREATE   PROCEDURE [dbo].[sqlcmdExportWithHeader]
     @schema  sysname,
     @table   sysname,
     @where   NVARCHAR(MAX) = NULL,   -- e.g. N'WHERE is_active = 1'
-    @orderBy NVARCHAR(MAX) = NULL    -- e.g. N'ORDER BY id'
+    @orderBy NVARCHAR(MAX) = NULL,    -- e.g. N'ORDER BY id'
+	@print   NVARCHAR(MAX) = NULL
 AS
 BEGIN
 	/*
@@ -70,7 +72,7 @@ BEGIN
     -- Build header row: SELECT 'col1','col2',...
     SELECT @header =
         STUFF((
-            SELECT N', CAST(''' + colname + N''' AS NVARCHAR(MAX))'
+            SELECT N', '+QUOTENAME(colname)+N'=CAST(''' + colname + N''' AS NVARCHAR(MAX))'
             FROM #cols
             ORDER BY column_id
             FOR XML PATH(''), TYPE
@@ -82,12 +84,12 @@ BEGIN
             SELECT N', ' +
                    CASE
                        WHEN typename IN ('varbinary','binary','image')
-                           THEN N'CONVERT(NVARCHAR(MAX), master.dbo.fn_varbintohexstr(' + QUOTENAME(colname) + N'))'
+                           THEN  QUOTENAME(colname)+N'=CONVERT(NVARCHAR(MAX), master.dbo.fn_varbintohexstr(' + QUOTENAME(colname) + N'))'
                        WHEN typename IN ('datetime','smalldatetime','datetime2','date','time','datetimeoffset')
-                           THEN N'CONVERT(NVARCHAR(30), ' + QUOTENAME(colname) + N', 126)'  -- ISO 8601
+                           THEN QUOTENAME(colname)+N'=CONVERT(NVARCHAR(30), ' + QUOTENAME(colname) + N', 126)'  -- ISO 8601
                        WHEN typename = 'uniqueidentifier'
-                           THEN N'CONVERT(NVARCHAR(36), ' + QUOTENAME(colname) + N')'
-                       ELSE N'CONVERT(NVARCHAR(MAX), ' + QUOTENAME(colname) + N')'
+                           THEN QUOTENAME(colname)+N'=CONVERT(NVARCHAR(36), ' + QUOTENAME(colname) + N')'
+                       ELSE QUOTENAME(colname)+N'=CONVERT(NVARCHAR(MAX), ' + QUOTENAME(colname) + N')'
                    END
             FROM #cols
             ORDER BY column_id
@@ -95,14 +97,16 @@ BEGIN
         ).value('.', 'NVARCHAR(MAX)'), 1, 2, N'');
 
     SET @sql = N'
-        SELECT ' + @header + N'
-        UNION ALL
-        SELECT ' + @data + N'
-        FROM ' + @qualified + N'
-        ' + COALESCE(@where,  N'') + N'
+        SELECT * FROM (
+			SELECT ' + @header + N'
+			UNION ALL
+			SELECT ' + @data + N'
+			FROM ' + @qualified + N'
+        ) AS src 
+		' + COALESCE(@where,  N'') + N'
         ' + COALESCE(@orderBy, N'') + N';';
 
-    --PRINT @sql;  -- uncomment to inspect the generated query
+    IF @print IS NOT NULL PRINT @sql;  -- uncomment to inspect the generated query
     EXEC sp_executesql @sql;
 END
 GO

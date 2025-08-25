@@ -10,6 +10,7 @@ GO
 
 
 
+
 CREATE procedure [dbo].[MSL_export_official]
 	@msl_or_tree int = NULL,
 	@taxnode_id int = NULL,
@@ -204,8 +205,10 @@ select
 			prev_proposal = (case
 				when dx.prev_proposal is null then ''
 				when dx.prev_proposal not like '%;%' then '=HYPERLINK("https://'+@server+'/ictv/proposals/'+dx.prev_proposal+'","'+dx.prev_proposal+'")'
-				-- if multiple proposals in a ;-sep list, link them all to the first one (Excel only allows one link per cell)
-				when dx.prev_proposal     like '%;%' then '=HYPERLINK("https://'+@server+'/ictv/proposals/'+left(dx.prev_proposal,charindex(';',dx.prev_proposal)-1)+'","'+dx.prev_proposal+'")'
+				-- if three proposals use the last (most recent) one (Excel only allows one link per cell)
+				when dx.prev_proposal     like '%;%;%' then '=HYPERLINK("https://'+@server+'/ictv/proposals/'+substring(dx.prev_proposal,charindex(';',dx.prev_proposal,charindex(';',dx.prev_proposal)+1)+1,1000)+'","'+substring(dx.prev_proposal,charindex(';',dx.prev_proposal,charindex(';',dx.prev_proposal)+1)+1,1000)+'")'
+				-- if two proposals use the last (most recent) one (Excel only allows one link per cell)
+				when dx.prev_proposal     like '%;%' then '=HYPERLINK("https://'+@server+'/ictv/proposals/'+substring(dx.prev_proposal,charindex(';',dx.prev_proposal)+1,1000)+'","'+substring(dx.prev_proposal,charindex(';',dx.prev_proposal)+1,1000)+'")'
 				end)
 		from taxonomy_node_merge_split tms
 		join taxonomy_node t on 

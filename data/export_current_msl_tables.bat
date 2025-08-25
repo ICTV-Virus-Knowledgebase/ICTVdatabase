@@ -29,15 +29,15 @@ SET SQLCMD_FLAGS=-d ICTVonline40 -s"	" -f o:65001 -y 0 -w 65535
 @ECHO ON
 
 @REM primary data tables
-sqlcmd %SQLCMD_FLAGS% -Q "EXEC dbo.sqlcmdExportWithHeader 'dbo', 'taxonomy_toc'" > "taxonomy_toc.utf8.dos.txt"
+sqlcmd %SQLCMD_FLAGS% -Q "EXEC dbo.sqlcmdExportWithHeader 'dbo', 'taxonomy_toc','','ORDER BY TRY_CAST(msl_release_num AS INT)'" > "taxonomy_toc.utf8.dos.txt"
 
 @REM used by ProposalQC 
-sqlcmd %SQLCMD_FLAGS% -Q "EXEC dbo.sqlcmdExportWithHeader 'dbo', 'taxonomy_node_export'" > "taxonomy_node_export.utf8.dos.txt"
+sqlcmd %SQLCMD_FLAGS% -Q "EXEC dbo.sqlcmdExportWithHeader 'dbo', 'taxonomy_node_export','','ORDER BY TRY_CAST(taxnode_id AS INT)'" > "taxonomy_node_export.utf8.dos.txt"
 @REM used for ETL to MariaDB, until MariaDB is primary
-sqlcmd %SQLCMD_FLAGS% -Q "EXEC dbo.sqlcmdExportWithHeader 'dbo', 'taxonomy_node_mariadb_etl'" > "taxonomy_node_mariadb_etl.utf8.dos.txt"
+sqlcmd %SQLCMD_FLAGS% -Q "EXEC dbo.sqlcmdExportWithHeader 'dbo', 'taxonomy_node_mariadb_etl','','ORDER BY TRY_CAST(taxnode_id AS INT)'" > "taxonomy_node_mariadb_etl.utf8.dos.txt"
 
 @REM replaced with species_isolates
-sqlcmd %SQLCMD_FLAGS% -Q "EXEC dbo.sqlcmdExportWithHeader 'dbo', 'species_isolates'" > "species_isolates.utf8.dos.txt"
+sqlcmd %SQLCMD_FLAGS% -Q "EXEC dbo.sqlcmdExportWithHeader 'dbo', 'species_isolates','','ORDER BY TRY_CAST(isolate_id AS INT)'" > "species_isolates.utf8.dos.txt"
 
 @REM CV tables
 sqlcmd %SQLCMD_FLAGS% -Q "EXEC dbo.sqlcmdExportWithHeader 'dbo', 'taxonomy_level'" > "taxonomy_level.utf8.dos.txt"
@@ -49,12 +49,12 @@ sqlcmd %SQLCMD_FLAGS% -Q "EXEC dbo.sqlcmdExportWithHeader 'dbo', 'taxonomy_chang
 
 
 
-@REM cache tables
-sqlcmd %SQLCMD_FLAGS% -Q "EXEC dbo.sqlcmdExportWithHeader 'dbo', 'taxonomy_node_delta'" > "taxonomy_node_delta.utf8.dos.txt"
-sqlcmd %SQLCMD_FLAGS% -Q "EXEC dbo.sqlcmdExportWithHeader 'dbo', 'taxonomy_node_merge_split'" > "taxonomy_node_merge_split.utf8.dos.txt"
+@REM cache tables - with stable sorts to be git friendly
+sqlcmd %SQLCMD_FLAGS% -Q "EXEC dbo.sqlcmdExportWithHeader 'dbo', 'taxonomy_node_delta','', 'ORDER BY TRY_CAST(msl AS INT), TRY_CAST(prev_taxid AS INT), TRY_CAST(new_taxid AS INT)'" > "taxonomy_node_delta.utf8.dos.txt"
+sqlcmd %SQLCMD_FLAGS% -Q "EXEC dbo.sqlcmdExportWithHeader 'dbo', 'taxonomy_node_merge_split','','ORDER BY TRY_CAST(prev_ictv_id AS INT), TRY_CAST(next_ictv_id AS INT)'" > "taxonomy_node_merge_split.utf8.dos.txt"
 
 @REM convenience views
-sqlcmd %SQLCMD_FLAGS% -Q "EXEC dbo.sqlcmdExportWithHeader 'dbo', 'vmr_export'" > "vmr_export.utf8.dos.txt"
+sqlcmd %SQLCMD_FLAGS% -Q "EXEC dbo.sqlcmdExportWithHeader 'dbo', 'vmr_export','','ORDER BY TRY_CAST(isolate_id AS INT)'" > "vmr_export.utf8.dos.txt"
 
 @REM copy back to laptop
 copy /Y  *.txt \\tsclient\ICTV\ICTVdatabase.main\data
