@@ -65,7 +65,7 @@ exportTaxonomyJSON() {
         treeSlug=$(echo "$treeSlug" | tr -cd '[:alnum:]_-')
 
         # Choose filename.
-        outFile="taxonomy${treeSlug}.json"
+        outFile="taxonomy_${treeSlug}.json"
 
         # Delete existing file if present.
         if [ -e "$outFile" ]; then
