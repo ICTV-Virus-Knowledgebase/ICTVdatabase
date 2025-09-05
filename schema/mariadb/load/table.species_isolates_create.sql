@@ -6,6 +6,13 @@ CREATE TABLE `species_isolates` (
   `species_name` VARCHAR(100) NOT NULL,
   `isolate_type` CHAR(1) NOT NULL,
   `isolate_names` VARCHAR(500),
+  `_isolate_name` VARCHAR(500) GENERATED ALWAYS AS (
+    CASE 
+      WHEN `isolate_names` LIKE '%;%' 
+      THEN LEFT(`isolate_names`, LOCATE(';', `isolate_names`) - 1) 
+      ELSE `isolate_names` 
+    END
+  ) PERSISTENT,
   `isolate_abbrevs` VARCHAR(255),
   `isolate_designation` VARCHAR(500),
   `genbank_accessions` VARCHAR(4000),
@@ -19,13 +26,6 @@ CREATE TABLE `species_isolates` (
   `update_prev_species` VARCHAR(100),
   `update_prev_taxnode_id` INT,
   `update_change_proposal` VARCHAR(512),
-  PRIMARY KEY (`isolate_id`),
-  `_isolate_name` VARCHAR(500) GENERATED ALWAYS AS (
-    CASE 
-      WHEN `isolate_names` LIKE '%;%' 
-      THEN LEFT(`isolate_names`, LOCATE(';', `isolate_names`) - 1) 
-      ELSE `isolate_names` 
-    END
-  ) PERSISTENT,
-  `notes` TEXT
+  `notes` TEXT,
+  PRIMARY KEY (`isolate_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;

@@ -2,11 +2,37 @@
 #
 # Generate release.json and taxonomy_yyyy.json
 #
+# ./exportTaxonomyJson.sh -> Generate JSON files for all releases
+# ./exportTaxonomyJson.sh 40 -> Generate JSON files for specific release
 
 set -euo pipefail
 
 # Database name
 DBNAME="ictv_taxonomy"
+
+# Flags
+populateAll=0
+populateByRelease=0
+
+#-----------------------------------------------------------------------------------
+# In case we need to populate taxonomy_json and taxonomy_json tables first
+#-----------------------------------------------------------------------------------
+populateTables(){
+
+    local treeID=inputFromUser
+
+    if [populateAll]; then
+        mariadb -D "$DBNAME" --batch --skip-column-names --silent -e "CALL initializeTaxonomyJsonRanks();"
+        and
+        mariadb -D "$DBNAME" --batch --skip-column-names --silent -e "CALL populateTaxonomyJsonForAllReleases();"
+    fi
+
+    if [populateByRelease]; then
+        mariadb -D "$DBNAME" --batch --skip-column-names --silent -e "CALL initializeTaxonomyJsonRanks();"
+        and
+        mariadb -D "$DBNAME" --batch --skip-column-names --silent -e "CALL populateTaxonomyJSON(${treeID});"
+    fi
+}
 
 #-----------------------------------------------------------------------------------
 # Export release data and save as releases.json.
