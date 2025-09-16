@@ -125,6 +125,7 @@ mariadb -D "$DBNAME" -vvv --show-warnings < udf.udf_getTreeID_create.sql
 mariadb -D "$DBNAME" -vvv --show-warnings < udf.udf_rankCountsToStringWithPurals_create.sql
 mariadb -D "$DBNAME" -vvv --show-warnings < udf.udf_singularOrPluralTaxLevelNames_create.sql
 mariadb -D "$DBNAME" -vvv --show-warnings < udf.vgd_strrchr_create.sql
+mariadb -D "$DBNAME" -vvv --show-warnings < udf.VMR_accessionsStripPrefixesAndConvertToCSV_create.sql
 
 # add stored procedures
 mariadb -D "$DBNAME" -vvv --show-warnings < sp.createParentGhostNodes_create.sql
