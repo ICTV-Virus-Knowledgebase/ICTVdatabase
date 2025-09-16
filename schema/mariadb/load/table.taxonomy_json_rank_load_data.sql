@@ -1,8 +1,10 @@
 -- taxonomy_json_rank
-LOAD DATA LOCAL INFILE '../../../data//taxonomy_json_rank.utf8.txt'
+LOAD DATA LOCAL INFILE '../../../data/taxonomy_json_rank.utf8.txt'
 INTO TABLE taxonomy_json_rank
+CHARACTER SET utf8mb4
 FIELDS TERMINATED BY '\t'
 OPTIONALLY ENCLOSED BY '"'
+ESCAPED BY '"'
 LINES TERMINATED BY '\n'
 IGNORE 1 ROWS
 (

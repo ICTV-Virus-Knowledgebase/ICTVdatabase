@@ -1,14 +1,16 @@
 -- load species_isolates data
-LOAD DATA LOCAL INFILE '../../../data//species_isolates.utf8.txt'
+LOAD DATA LOCAL INFILE '../../../data/species_isolates.utf8.txt'
 INTO TABLE species_isolates
+CHARACTER SET utf8mb4
 FIELDS TERMINATED BY '\t'
-OPTIONALLY ENCLOSED BY '"'
+-- OPTIONALLY ENCLOSED BY '"'
+-- ESCAPED BY '"'
 LINES TERMINATED BY '\n'
 IGNORE 1 ROWS
 (
   isolate_id,
-  taxnode_id,
-  species_sort,
+  @taxnode_id_s,
+  @species_sort_s,
   isolate_sort,
   species_name,
   isolate_type,
@@ -25,10 +27,14 @@ IGNORE 1 ROWS
   refseq_taxids,
   update_change,
   update_prev_species,
-  update_prev_taxnode_id,
+  @update_prev_taxnode_id_s,
   update_change_proposal,
   notes
-);
+)
+SET
+  taxnode_id            = NULLIF(NULLIF(@taxnode_id_s, ''), 'NULL'),
+  update_prev_taxnode_id= NULLIF(NULLIF(@update_prev_taxnode_id_s, ''), 'NULL'),
+  species_sort          = NULLIF(NULLIF(@species_sort_s, ''), 'NULL');
 
 -- check number of rows:
 -- SELECT COUNT(*) AS total_count, '16521' AS should_be FROM species_isolates;
