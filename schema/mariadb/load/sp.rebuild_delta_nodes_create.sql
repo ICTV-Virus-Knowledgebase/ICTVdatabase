@@ -45,8 +45,10 @@ BEGIN
             WHEN p.is_ref=0  AND n.is_ref=1 THEN  1
             ELSE 0
         END                                                         AS is_now_type,
-        (p.level_id > n.level_id)                                   AS is_promoted,
-        (p.level_id < n.level_id)                                   AS is_demoted
+        IF(p.level_id IS NOT NULL AND n.level_id IS NOT NULL AND p.level_id > n.level_id, 1, 0) AS is_promoted,
+        IF(p.level_id IS NOT NULL AND n.level_id IS NOT NULL AND p.level_id < n.level_id, 1, 0) AS is_demoted
+        -- (p.level_id > n.level_id)                                   AS is_promoted,
+        -- (p.level_id < n.level_id)                                   AS is_demoted
     FROM taxonomy_node AS n
     LEFT JOIN taxonomy_node AS p  ON p.msl_release_num = n.msl_release_num-1
                                  AND n.in_target COLLATE utf8mb4_bin IN (p.lineage, p.name)
@@ -71,13 +73,30 @@ BEGIN
         s.new_taxid,
         s.proposal,
         CONCAT_WS('', IFNULL(CONCAT('[',p_debug_notes,'RENAME,MERGE,PROMOTE,MOVE,ABOLISH];'),''), s.notes),
-        (prev_msl.name <> next_msl.name COLLATE utf8mb4_bin
-         AND s.is_merged = 0)                                       AS is_renamed,
+        IF(
+            next_msl.name IS NOT NULL
+            AND prev_msl.name IS NOT NULL
+            AND prev_msl.name <> next_msl.name COLLATE utf8mb4_bin
+            AND COALESCE(s.is_merged,0) = 0,
+            1, 0
+        ) AS is_renamed,
+        -- (prev_msl.name <> next_msl.name COLLATE utf8mb4_bin
+        --  AND s.is_merged = 0)                                       AS is_renamed,
         s.is_merged,
-        (prev_pmsl.lineage <> next_pmsl.lineage COLLATE utf8mb4_bin
-         AND (prev_pmsl.level_id<>100 OR next_pmsl.level_id<>100))  AS is_lineage_updated,
-        (prev_msl.level_id > next_msl.level_id)                     AS is_promoted,
-        (prev_msl.level_id < next_msl.level_id)                     AS is_demoted,
+        IF(
+            next_pmsl.lineage IS NOT NULL
+            AND prev_pmsl.lineage IS NOT NULL
+            AND prev_pmsl.lineage <> next_pmsl.lineage COLLATE utf8mb4_bin
+            AND (prev_pmsl.level_id<>100 OR next_pmsl.level_id<>100),
+            1, 0
+        ) AS is_lineage_updated,
+        -- (prev_pmsl.lineage <> next_pmsl.lineage COLLATE utf8mb4_bin
+        --  AND (prev_pmsl.level_id<>100 OR next_pmsl.level_id<>100))  AS is_lineage_updated,
+         IF(next_msl.level_id IS NOT NULL AND prev_msl.level_id > next_msl.level_id, 1, 0) AS is_promoted,
+         IF(next_msl.level_id IS NOT NULL AND prev_msl.level_id < next_msl.level_id, 1, 0) AS is_demoted,
+
+        -- (prev_msl.level_id > next_msl.level_id)                     AS is_promoted,
+        -- (prev_msl.level_id < next_msl.level_id)                     AS is_demoted,
         CASE
             WHEN prev_msl.is_ref=1 AND next_msl.is_ref=0 THEN -1
             WHEN prev_msl.is_ref=0 AND next_msl.is_ref=1 THEN  1
@@ -146,8 +165,10 @@ BEGIN
         CONCAT_WS('', IFNULL(CONCAT('[',p_debug_notes,'NO CHANGE];'),''), p.out_notes),
         (pp.lineage <> pn.lineage COLLATE utf8mb4_bin
          AND pp.level_id<>100)                              AS is_lineage_updated,
-        (p.level_id > n.level_id)                           AS is_promoted,
-        (p.level_id < n.level_id)                           AS is_demoted,
+         IF(p.level_id IS NOT NULL AND n.level_id IS NOT NULL AND p.level_id > n.level_id, 1, 0) AS is_promoted,
+         IF(p.level_id IS NOT NULL AND n.level_id IS NOT NULL AND p.level_id < n.level_id, 1, 0) AS is_demoted,
+        -- (p.level_id > n.level_id)                           AS is_promoted,
+        -- (p.level_id < n.level_id)                           AS is_demoted,
         CASE
           WHEN p.is_ref=1 AND n.is_ref=0 THEN -1
           WHEN p.is_ref=0 AND n.is_ref=1 THEN  1
@@ -179,37 +200,78 @@ BEGIN
     /* -------------------------------------------------------------
        UPDATE is_moved  (same arithmetic logic, CONCAT in notes)
     ------------------------------------------------------------- */
+
     UPDATE taxonomy_node_delta AS d
-    /* parent / node look-ups */
     LEFT JOIN taxonomy_node_names prev_node  ON prev_node.taxnode_id = d.prev_taxid
-    LEFT JOIN taxonomy_node prev_parent      ON prev_parent.taxnode_id = prev_node.parent_id
+    LEFT JOIN taxonomy_node       prev_parent ON prev_parent.taxnode_id = prev_node.parent_id
     LEFT JOIN taxonomy_node_names next_node  ON next_node.taxnode_id = d.new_taxid
-    LEFT JOIN taxonomy_node next_parent      ON next_parent.taxnode_id = next_node.parent_id
+    LEFT JOIN taxonomy_node       next_parent ON next_parent.taxnode_id = next_node.parent_id
     LEFT JOIN taxonomy_node_delta parent_delta
-           ON parent_delta.prev_taxid = prev_parent.taxnode_id
-          AND parent_delta.new_taxid  = next_parent.taxnode_id
-    SET d.is_moved = (
-          (prev_parent.ictv_id <> next_parent.ictv_id)
-        * (prev_node.out_change NOT LIKE '%promot%')
-        * (prev_node.out_change NOT LIKE '%demot%')
-        * IF(parent_delta.is_merged = 1, 0, 1)
-        * IF(parent_delta.is_split  = 1,
-             (prev_parent.ictv_id <> next_parent.ictv_id), 1)
-        * IF(prev_parent.level_id = 100 AND next_parent.level_id=100, 0, 1)
-      ),
-      d.notes = IF(
-          ( (prev_parent.ictv_id <> next_parent.ictv_id)
-          * (prev_node.out_change NOT LIKE '%promot%')
-          * (prev_node.out_change NOT LIKE '%demot%')
-          * IF(parent_delta.is_merged=1,0,1)
-          * IF(parent_delta.is_split=1,
-               (prev_parent.ictv_id <> next_parent.ictv_id),1)
-          * IF(prev_parent.level_id=100 AND next_parent.level_id=100,0,1) )
-          = 1,
-          CONCAT('[',p_debug_notes,'SET MOVED=1];',d.notes),
-          d.notes
-      )
-    WHERE prev_node.msl_release_num+1 = p_msl;
+        ON parent_delta.prev_taxid = prev_parent.taxnode_id
+        AND parent_delta.new_taxid  = next_parent.taxnode_id
+    SET
+    d.is_moved =
+        (
+        IF(prev_parent.ictv_id IS NOT NULL AND next_parent.ictv_id IS NOT NULL
+            AND prev_parent.ictv_id <> next_parent.ictv_id, 1, 0)
+        * IF(COALESCE(prev_node.out_change, '') NOT LIKE '%promot%', 1, 0)
+        * IF(COALESCE(prev_node.out_change, '') NOT LIKE '%demot%', 1, 0)
+        * IF(COALESCE(parent_delta.is_merged, 0) = 1, 0, 1)
+        * IF(COALESCE(parent_delta.is_split, 0) = 1,
+            IF(prev_parent.ictv_id IS NOT NULL AND next_parent.ictv_id IS NOT NULL
+                AND prev_parent.ictv_id <> next_parent.ictv_id, 1, 0),
+            1)
+        * IF(prev_parent.level_id = 100 AND next_parent.level_id = 100, 0, 1)
+        ),
+    d.notes = IF(
+        (
+            IF(prev_parent.ictv_id IS NOT NULL AND next_parent.ictv_id IS NOT NULL
+            AND prev_parent.ictv_id <> next_parent.ictv_id, 1, 0)
+        * IF(COALESCE(prev_node.out_change, '') NOT LIKE '%promot%', 1, 0)
+        * IF(COALESCE(prev_node.out_change, '') NOT LIKE '%demot%', 1, 0)
+        * IF(COALESCE(parent_delta.is_merged, 0) = 1, 0, 1)
+        * IF(COALESCE(parent_delta.is_split, 0) = 1,
+            IF(prev_parent.ictv_id IS NOT NULL AND next_parent.ictv_id IS NOT NULL
+                AND prev_parent.ictv_id <> next_parent.ictv_id, 1, 0),
+            1)
+        * IF(prev_parent.level_id = 100 AND next_parent.level_id = 100, 0, 1)
+        ) = 1,
+        CONCAT('[',p_debug_notes,'SET MOVED=1];', d.notes),
+        d.notes
+        )
+    WHERE prev_node.msl_release_num + 1 = p_msl;
+
+    -- UPDATE taxonomy_node_delta AS d
+    -- /* parent / node look-ups */
+    -- LEFT JOIN taxonomy_node_names prev_node  ON prev_node.taxnode_id = d.prev_taxid
+    -- LEFT JOIN taxonomy_node prev_parent      ON prev_parent.taxnode_id = prev_node.parent_id
+    -- LEFT JOIN taxonomy_node_names next_node  ON next_node.taxnode_id = d.new_taxid
+    -- LEFT JOIN taxonomy_node next_parent      ON next_parent.taxnode_id = next_node.parent_id
+    -- LEFT JOIN taxonomy_node_delta parent_delta
+    --        ON parent_delta.prev_taxid = prev_parent.taxnode_id
+    --       AND parent_delta.new_taxid  = next_parent.taxnode_id
+    -- SET d.is_moved = (
+    --       (prev_parent.ictv_id <> next_parent.ictv_id)
+    --     * (prev_node.out_change NOT LIKE '%promot%')
+    --     * (prev_node.out_change NOT LIKE '%demot%')
+    --     * IF(parent_delta.is_merged = 1, 0, 1)
+    --     * IF(parent_delta.is_split  = 1,
+    --          (prev_parent.ictv_id <> next_parent.ictv_id), 1)
+    --     * IF(prev_parent.level_id = 100 AND next_parent.level_id=100, 0, 1)
+    --   ),
+    --   d.notes = IF(
+    --       ( (prev_parent.ictv_id <> next_parent.ictv_id)
+    --       * (prev_node.out_change NOT LIKE '%promot%')
+    --       * (prev_node.out_change NOT LIKE '%demot%')
+    --       * IF(parent_delta.is_merged=1,0,1)
+    --       * IF(parent_delta.is_split=1,
+    --            (prev_parent.ictv_id <> next_parent.ictv_id),1)
+    --       * IF(prev_parent.level_id=100 AND next_parent.level_id=100,0,1) )
+    --       = 1,
+    --       CONCAT('[',p_debug_notes,'SET MOVED=1];',d.notes),
+    --       d.notes
+    --   )
+    -- WHERE prev_node.msl_release_num+1 = p_msl;
 
     /* -------------------------------------------------------------
        UPGRADE rename → merge when N:1
