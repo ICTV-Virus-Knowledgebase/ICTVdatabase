@@ -22,4 +22,4 @@ jobs:
             -H "Authorization: token ${{ secrets.ICTV_ontology_dispatch }}" \
             -H "Accept: application/vnd.github.v3+json" \
             https://api.github.com/repos/EVORA-project/ictv-ontology/actions/workflows/release.yml/dispatches \
-            -d '{"ref":"main","inputs":{"reason":"upstream release"}}'
+            -d '{"ref":"main","inputs":{}}'
