@@ -119,11 +119,11 @@ mariadb -D "$DBNAME" -vvv --show-warnings < add_foreign_keys.sql
 # add user defined functions
 mariadb -D "$DBNAME" -vvv --show-warnings < udf.count_accents_create.sql
 mariadb -D "$DBNAME" -vvv --show-warnings < udf.getChildTaxaCounts_create.sql
-mariadb -D "$DBNAME" -vvv --show-warnings < udf.udf_getMSL_create.sql
-mariadb -D "$DBNAME" -vvv --show-warnings < udf.udf_getTaxNodeChildInfo_create.sql
-mariadb -D "$DBNAME" -vvv --show-warnings < udf.udf_getTreeID_create.sql
-mariadb -D "$DBNAME" -vvv --show-warnings < udf.udf_rankCountsToStringWithPurals_create.sql
-mariadb -D "$DBNAME" -vvv --show-warnings < udf.udf_singularOrPluralTaxLevelNames_create.sql
+mariadb -D "$DBNAME" -vvv --show-warnings < udf.getMSL_create.sql
+mariadb -D "$DBNAME" -vvv --show-warnings < udf.getTaxNodeChildInfo_create.sql
+mariadb -D "$DBNAME" -vvv --show-warnings < udf.getTreeID_create.sql
+mariadb -D "$DBNAME" -vvv --show-warnings < udf.rankCountsToStringWithPurals_create.sql
+mariadb -D "$DBNAME" -vvv --show-warnings < udf.singularOrPluralTaxLevelNames_create.sql
 mariadb -D "$DBNAME" -vvv --show-warnings < udf.vgd_strrchr_create.sql
 mariadb -D "$DBNAME" -vvv --show-warnings < udf.VMR_accessionsStripPrefixesAndConvertToCSV_create.sql
 
@@ -159,7 +159,7 @@ mariadb -D "$DBNAME" -vvv --show-warnings < sp.QC_module_virus_prop_tabs_create.
 mariadb -D "$DBNAME" -vvv --show-warnings < sp.QC_module_vmr_export_species_count_create.sql
 mariadb -D "$DBNAME" -vvv --show-warnings < sp.rebuild_delta_nodes_create.sql
 mariadb -D "$DBNAME" -vvv --show-warnings < sp.searchTaxonomy_create.sql
-mariadb -D "$DBNAME" -vvv --show-warnings < sp.sp_simplify_molecule_id_settings_create.sql
+mariadb -D "$DBNAME" -vvv --show-warnings < sp.simplify_molecule_id_settings_create.sql
 mariadb -D "$DBNAME" -vvv --show-warnings < sp.species_isolates_update_sorts_create.sql
 mariadb -D "$DBNAME" -vvv --show-warnings < sp.NCBI_linkout_ft_export_create.sql
 mariadb -D "$DBNAME" -vvv --show-warnings < sp.taxonomy_node_compute_indexes_create.sql
@@ -167,7 +167,7 @@ mariadb -D "$DBNAME" -vvv --show-warnings < sp.rebuild_node_merge_split_create.s
 
 # Triggers
 # Not yet created
-# mariadb -D "$DBNAME" -vvv --show-warnings < tr.TR_taxonomy_node_UPDATE_indexes.sql
+# mariadb -D "$DBNAME" -vvv --show-warnings < tr.taxonomy_node_UPDATE_indexes.sql
 
 # Run SPs to populate taxonomy_json and taxonomy_json_rank
 mariadb -D "$DBNAME" -vvv --show-warnings < populate_taxonomy_json_rank.sql
