@@ -104,17 +104,17 @@ mariadb -D "$DBNAME" -vvv --show-warnings < view.taxonomy_node_dx_create.sql
 mariadb -D "$DBNAME" -vvv --show-warnings < view.taxonomy_node_export_create.sql
 mariadb -D "$DBNAME" -vvv --show-warnings < view.taxonomy_node_x_create.sql
 mariadb -D "$DBNAME" -vvv --show-warnings < view.taxonomy_toc_dx_create.sql
-mariadb -D "$DBNAME" -vvv --show-warnings < view.view_taxa_level_counts_by_release_create.sql
-mariadb -D "$DBNAME" -vvv --show-warnings < view.view_taxonomy_stats_create.sql
+mariadb -D "$DBNAME" -vvv --show-warnings < view.taxa_level_counts_by_release_create.sql
+mariadb -D "$DBNAME" -vvv --show-warnings < view.taxonomy_stats_create.sql
 mariadb -D "$DBNAME" -vvv --show-warnings < view.virus_isolates_create.sql
 mariadb -D "$DBNAME" -vvv --show-warnings < view.vmr_export_create.sql
 mariadb -D "$DBNAME" -vvv --show-warnings < view.QC_generate_taxonomy_history_binned_test_cases_create.sql
 
 # add indexes
-mariadb -D "$DBNAME" -vvv --show-warnings < add_indexes.sql
+mariadb -D "$DBNAME" -vvv --show-warnings < create_indexes.sql
 
 # add foreign keys to tables
-mariadb -D "$DBNAME" -vvv --show-warnings < add_foreign_keys.sql
+mariadb -D "$DBNAME" -vvv --show-warnings < create_foreign_keys.sql
 
 # add user defined functions
 mariadb -D "$DBNAME" -vvv --show-warnings < udf.count_accents_create.sql
