@@ -1,7 +1,6 @@
 CREATE OR REPLACE VIEW `vmr_export` AS
 SELECT
-    si.isolate_id                                             AS `isolate_id`,
-    CONCAT('ICTV', si.isolate_id)                             AS `Isolate ID`,
+    CONCAT('VMR', si.isolate_id)                              AS `Isolate ID`,
     si.species_sort                                           AS `Species Sort`,
     si.isolate_sort                                           AS `Isolate Sort`,
     tn.realm                                                  AS `Realm`,
@@ -18,15 +17,14 @@ SELECT
     tn.subfamily                                              AS `Subfamily`,
     tn.genus                                                  AS `Genus`,
     tn.subgenus                                               AS `Subgenus`,
-
+    tn.species                                                AS `Species`, 
     -- Species, as an Excel hyperlink to taxon history
     CONCAT(
       '=HYPERLINK("https://ictv.global/taxonomy/taxondetails?taxnode_id=',
-      tn.taxnode_id, '","',
-      REPLACE(IFNULL(tn.species,''), '"', '""'),
+      tn.ictv_id, '","',
+      REPLACE(IFNULL(tn.ictv_id,''), '"', '""'),
       '")'
-    )                                                         AS `Species`,
-
+    )                                                         AS `ICTV_ID`,
     IFNULL(si.isolate_type, '')                               AS `Exemplar or additional isolate`,
     IFNULL(si.isolate_names, '')                              AS `Virus name(s)`,
     IFNULL(si.isolate_abbrevs, '')                            AS `Virus name abbreviation(s)`,
@@ -37,7 +35,6 @@ SELECT
     IFNULL(si.genome_coverage, '')                            AS `Genome coverage`,
     IFNULL(si.molecule, '')                                   AS `Genome`,
     IFNULL(si.host_source, '')                                AS `Host source`,
-
     CASE
       WHEN IFNULL(si.genbank_accessions,'') <> '' THEN
         CONCAT(
@@ -47,9 +44,7 @@ SELECT
         )
       ELSE ''
     END                                                       AS `Accessions Link`,
-
     IFNULL(si.notes, '')                                      AS `Editor Notes`,
-
     -- QC
     CASE
       WHEN si.molecule <> tn.inher_molecule THEN 'ERROR:molecule '
@@ -67,7 +62,6 @@ SELECT
       ),
       ''
     )                                                         AS `QC_taxon_proposal`
-
 FROM `species_isolates` AS si
 JOIN `taxonomy_node_names` AS tn
   ON tn.taxnode_id = si.taxnode_id
