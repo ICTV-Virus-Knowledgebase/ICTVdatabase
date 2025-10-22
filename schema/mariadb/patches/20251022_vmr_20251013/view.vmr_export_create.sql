@@ -1,6 +1,8 @@
 CREATE OR REPLACE VIEW `vmr_export` AS
 SELECT
-    CONCAT('VMR', si.isolate_id)                              AS `Isolate ID`,
+    CONCAT('=HYPERLINK("https://ictv.global/id/',
+      'VMR', si.isolate_id,
+      '","','VMR', si.isolate_id,'")')                        AS `Isolate ID`,
     si.species_sort                                           AS `Species Sort`,
     si.isolate_sort                                           AS `Isolate Sort`,
     tn.realm                                                  AS `Realm`,
@@ -20,9 +22,9 @@ SELECT
     tn.species                                                AS `Species`, 
     -- Species, as an Excel hyperlink to taxon history
     CONCAT(
-      '=HYPERLINK("https://ictv.global/taxonomy/taxondetails?taxnode_id=',
-      tn.ictv_id, '","',
-      REPLACE(IFNULL(tn.ictv_id,''), '"', '""'),
+      '=HYPERLINK("https://ictv.global/id/',
+      'ICTV', tn.ictv_id,
+      '","','ICTV',tn.ictv_id,
       '")'
     )                                                         AS `ICTV_ID`,
     IFNULL(si.isolate_type, '')                               AS `Exemplar or additional isolate`,
