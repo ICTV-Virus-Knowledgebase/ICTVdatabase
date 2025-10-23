@@ -5,9 +5,9 @@ Errors encountered; SQL generation may be incorrect.
 
 -- Column 'Genome coverage' value 'Not Compliant' from 'Column Values' row(s) 6
 INSERT INTO taxonomy_genome_coverage (
-    genome_coverage
+    genome_coverage, `name`, priority
 ) VALUES (
-    'Not Compliant'
+    'NC','Not Compliant', 150
 );
 
 -- Column 'Host source' value 'fungi (S)' from 'Column Values' row(s) 9
