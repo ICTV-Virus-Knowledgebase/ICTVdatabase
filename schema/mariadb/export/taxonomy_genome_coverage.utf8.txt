@@ -1,0 +1,6 @@
+genome_coverage	name	priority
+CCG	Coding-complete genome	300
+CG	Complete genome	400
+NC	Not Compliant	150
+NG	No entry in Genbank	100
+PG	Partial genome	200

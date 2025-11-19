@@ -1,0 +1,17 @@
+id	parent_id	name	plural	suffix	suffix_viroid	suffix_nuc_acid	suffix_viriform	notes
+100	NULL	tree	trees	NULL	NULL	NULL	NULL	MUST HAVE tree_id=parent_id=taxnode_id
+120	100	realm	realms	viria	viroidia	satellitia	viriformia	20180615 added
+130	120	subrealm	subrealms	vira	viroida	satellita	viriforma	20180615 added
+140	130	kingdom	kingdoms	virae	viroidae	satellitae	viriformae	20180615 added
+150	140	subkingdom	subkingdoms	virites	viroidites	satellitites	viriformites	20180615 added
+160	150	phylum	phyla	viricota	viroidicota	satelliticota	viriformicota	20180615 added
+170	160	subphylum	subphyla	viricotina	viroidicotina	satelliticotina	viriformicotina	20180615 added
+180	170	class	classes	viricetes	viroidicetes	satelliticetes	viriformicetes	20180615 added
+190	180	subclass	subclasses	viricetidae	viroidicetidae	satelliticetidae	viriformicetidea	20180615 added
+200	190	order	orders	virales	viroidales	satellitales	viriformales	20180615 new parent=subclass
+250	200	suborder	suborders	virineae	viroidineae	satellitineae	viriformineae	20180615 added
+300	250	family	families	viridae	viroidae	satellitidae	viriformidae	20180615 new parent=suborder
+400	300	subfamily	subfamilies	virinae	viroidinae	satellitinae	viriforminae	NULL
+500	400	genus	genera	virus	viroid	satellite	viriform	NULL
+550	500	subgenus	subgenera	virus	viroid	satellite	viriform	20180615 added
+600	550	species	species	NULL	NULL	NULL	NULL	20180615 new parent=subgenus
