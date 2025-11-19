@@ -7,6 +7,7 @@ bacteria, invertebrates (S)
 bacteria, vertebrates (S)
 freshwater (S)
 fungi
+fungi (S)
 invertebrates
 invertebrates (S)
 invertebrates, plants
