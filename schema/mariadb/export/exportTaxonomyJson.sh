@@ -7,32 +7,16 @@
 
 set -euo pipefail
 
+# exportTaxonomyJson script aboslute path
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+
+# output directory path relative from exportTaxonomyJson.sh
+OUT_DIR="$(cd "$SCRIPT_DIR/../../../data/exportTaxonomyJson" && pwd)"
+
+echo "Using OUT_DIR=$OUT_DIR"
+
 # Database name
 DBNAME="ictv_taxonomy"
-
-# Flags
-populateAll=0
-populateByRelease=0
-
-#-----------------------------------------------------------------------------------
-# In case we need to populate taxonomy_json and taxonomy_json tables first
-#-----------------------------------------------------------------------------------
-populateTables(){
-
-    local treeID=inputFromUser
-
-    if [populateAll]; then
-        mariadb -D "$DBNAME" --batch --skip-column-names --silent -e "CALL initializeTaxonomyJsonRanks();"
-        and
-        mariadb -D "$DBNAME" --batch --skip-column-names --silent -e "CALL populateTaxonomyJsonForAllReleases();"
-    fi
-
-    if [populateByRelease]; then
-        mariadb -D "$DBNAME" --batch --skip-column-names --silent -e "CALL initializeTaxonomyJsonRanks();"
-        and
-        mariadb -D "$DBNAME" --batch --skip-column-names --silent -e "CALL populateTaxonomyJSON(${treeID});"
-    fi
-}
 
 #-----------------------------------------------------------------------------------
 # Export release data and save as releases.json.
@@ -40,17 +24,17 @@ populateTables(){
 exportReleasesJSON() {
 
     # remove existing file if present
-    if [ -e "releases.json" ]; then
+    if [ -e "$OUT_DIR/releases.json" ]; then
         # try to remove; on failure run the error handler (echo to stderr + exit)
-        rm -f "releases.json" || { echo "Failed to remove existing releases.json" >&2; exit 1; }
+        rm -f "$OUT_DIR/releases.json" || { echo "Failed to remove existing releases.json" >&2; exit 1; }
     fi
 
     mariadb -D "$DBNAME" --batch --skip-column-names --silent \
-    -e "CALL exportReleasesJSON();" > "releases.json"
+    -e "CALL exportReleasesJSON();" > "$OUT_DIR/releases.json"
 
     # verify output was created and is not empty
-    if [ ! -s "releases.json" ]; then
-        echo "releases.json was not created or is empty" >&2
+    if [ ! -s "$OUT_DIR/releases.json" ]; then
+        echo "$OUT_DIR/releases.json was not created or is empty" >&2
         exit 1
     fi
     
@@ -91,7 +75,7 @@ exportTaxonomyJSON() {
         treeSlug=$(echo "$treeSlug" | tr -cd '[:alnum:]_-')
 
         # Choose filename.
-        outFile="taxonomy_${treeSlug}.json"
+        outFile="$OUT_DIR/taxonomy_${treeSlug}.json"
 
         # Delete existing file if present.
         if [ -e "$outFile" ]; then
