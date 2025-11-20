@@ -15,7 +15,6 @@ IGNORE 1 ROWS
   species_name,
   isolate_type,
   isolate_names,
-  @computed_col,               -- <-- Skip the _isolate_name column
   isolate_abbrevs,
   isolate_designation,
   genbank_accessions,
@@ -29,6 +28,7 @@ IGNORE 1 ROWS
   update_prev_species,
   update_prev_taxnode_id,
   update_change_proposal,
+  @computed_col,               -- <-- Skip the _isolate_name column
   notes
 );
 -- SET
