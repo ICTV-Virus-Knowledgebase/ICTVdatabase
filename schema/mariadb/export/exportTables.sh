@@ -37,7 +37,7 @@ mariadb -D "$DATABASE" --default-character-set=utf8mb4 --batch --raw -e "SELECT 
 # taxonomy_toc
 mariadb -D "$DATABASE" --default-character-set=utf8mb4 --batch --raw -e "SELECT * FROM "$taxonomy_toc" ORDER BY msl_release_num" > "$DATA_DIR/taxonomy_toc.utf8.txt"
 # taxonomy_node
-mariadb -D "$DATABASE" --default-character-set=utf8mb4 --batch --raw -e "SELECT * FROM "$taxonomy_node" ORDER BY taxnode_id" > "$DATA_DIR/taxonomy_node.utf8.txt"
+# mariadb -D "$DATABASE" --default-character-set=utf8mb4 --batch --raw -e "SELECT * FROM "$taxonomy_node" ORDER BY taxnode_id" > "taxonomy_node.utf8.txt"
 # taxonomy_level
 mariadb -D "$DATABASE" --default-character-set=utf8mb4 --batch --raw -e "SELECT * FROM "$taxonomy_level"" > "$DATA_DIR/taxonomy_level.utf8.txt"
 # taxonomy_molecule
@@ -54,3 +54,99 @@ mariadb -D "$DATABASE" --default-character-set=utf8mb4 --batch --raw -e "SELECT 
 mariadb -D "$DATABASE" --default-character-set=utf8mb4 --batch --raw -e "SELECT * FROM "$taxonomy_node_delta" ORDER BY msl, prev_taxid, new_taxid" > "$DATA_DIR/taxonomy_node_delta.utf8.txt"
 # taxonomy_node_merge_split
 mariadb -D "$DATABASE" --default-character-set=utf8mb4 --batch --raw -e "SELECT * FROM "$taxonomy_node_merge_split" ORDER BY prev_ictv_id, next_ictv_id" > "$DATA_DIR/taxonomy_node_merge_split.utf8.txt"
+
+# taxonomy_node
+mariadb -D "$DATABASE" --default-character-set=utf8mb4 --batch --raw \
+  -e "SELECT \
+    taxnode_id,
+    parent_id,
+    tree_id,
+    msl_release_num,
+    level_id,
+    name,
+    ictv_id,
+    molecule_id,
+    abbrev_csv,
+    genbank_accession_csv,
+    genbank_refseq_accession_csv,
+    refseq_accession_csv,
+    isolate_csv,
+    notes,
+    is_ref,
+    is_official,
+    is_hidden,
+    is_deleted,
+    is_deleted_next_year,
+    is_typo,
+    is_renamed_next_year,
+    is_obsolete,
+    in_change,
+    in_target,
+    in_filename,
+    in_notes,
+    out_change,
+    out_target,
+    out_filename,
+    out_notes,
+    start_num_sort,
+    row_num,
+    filename,
+    xref,
+    realm_id,
+    realm_kid_ct,
+    realm_desc_ct,
+    subrealm_id,
+    subrealm_kid_ct,
+    subrealm_desc_ct,
+    kingdom_id,
+    kingdom_kid_ct,
+    kingdom_desc_ct,
+    subkingdom_id,
+    subkingdom_kid_ct,
+    subkingdom_desc_ct,
+    phylum_id,
+    phylum_kid_ct,
+    phylum_desc_ct,
+    subphylum_id,
+    subphylum_kid_ct,
+    subphylum_desc_ct,
+    class_id,
+    class_kid_ct,
+    class_desc_ct,
+    subclass_id,
+    subclass_kid_ct,
+    subclass_desc_ct,
+    order_id,
+    order_kid_ct,
+    order_desc_ct,
+    suborder_id,
+    suborder_kid_ct,
+    suborder_desc_ct,
+    family_id,
+    family_kid_ct,
+    family_desc_ct,
+    subfamily_id,
+    subfamily_kid_ct,
+    subfamily_desc_ct,
+    genus_id,
+    genus_kid_ct,
+    genus_desc_ct,
+    subgenus_id,
+    subgenus_kid_ct,
+    subgenus_desc_ct,
+    species_id,
+    species_kid_ct,
+    species_desc_ct,
+    taxa_kid_cts,
+    taxa_desc_cts,
+    inher_molecule_id,
+    left_idx,
+    right_idx,
+    node_depth,
+    lineage,
+    exemplar_name,
+    genome_coverage,
+    host_source
+   FROM $taxonomy_node
+   ORDER BY taxnode_id" \
+  > "taxonomy_node.utf8.txt"
