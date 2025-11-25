@@ -1,8 +1,0 @@
-change	notes
-abolish	NULL
-demote	NULL
-merge	NULL
-move	NULL
-promote	NULL
-rename	NULL
-type	Assign or remove as type species in a genus; this exists to place hold the proposal reference with a verb. If other changes are happening at the same time, then this verb is not necessary; [2015-03-17 curtish@uab.edu added during MSL29]

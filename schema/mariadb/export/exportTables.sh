@@ -149,4 +149,4 @@ mariadb -D "$DATABASE" --default-character-set=utf8mb4 --batch --raw \
     host_source
    FROM $taxonomy_node
    ORDER BY taxnode_id" \
-  > "taxonomy_node.utf8.txt"
+  > "$DATA_DIR/taxonomy_node_mariadb_etl.utf8.txt"
