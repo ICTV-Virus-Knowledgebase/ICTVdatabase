@@ -7,9 +7,9 @@ DELIMITER //
 DROP PROCEDURE IF EXISTS rebuild_delta_nodes //
 CREATE PROCEDURE rebuild_delta_nodes
 (
-    IN  p_msl         INT,
-    IN  p_debug_taxid INT,
-    IN  p_debug_notes VARCHAR(20)
+    IN  p_msl         INT DEFAULT NULL,
+    IN  p_debug_taxid INT DEFAULT NULL,
+    IN  p_debug_notes VARCHAR(20) DEFAULT NULL
 )
 BEGIN
     /* -------------------------------------------------------------
@@ -163,8 +163,13 @@ BEGIN
         n.taxnode_id,
         p.out_filename,
         CONCAT_WS('', IFNULL(CONCAT('[',p_debug_notes,'NO CHANGE];'),''), p.out_notes),
-        (pp.lineage <> pn.lineage COLLATE utf8mb4_bin
-         AND pp.level_id<>100)                              AS is_lineage_updated,
+        IF(
+            pp.lineage IS NOT NULL
+            AND pn.lineage IS NOT NULL
+            AND pp.lineage <> pn.lineage COLLATE utf8mb4_bin
+            AND pp.level_id<>100,
+            1, 0
+        )                                                   AS is_lineage_updated,
          IF(p.level_id IS NOT NULL AND n.level_id IS NOT NULL AND p.level_id > n.level_id, 1, 0) AS is_promoted,
          IF(p.level_id IS NOT NULL AND n.level_id IS NOT NULL AND p.level_id < n.level_id, 1, 0) AS is_demoted,
         -- (p.level_id > n.level_id)                           AS is_promoted,
