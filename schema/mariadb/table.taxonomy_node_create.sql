@@ -1,22 +1,3 @@
--- USE ICTVonline39_forProd;
-
--- SET foreign_key_checks = 0;
--- DROP TABLE IF EXISTS `species_isolates`;
--- DROP TABLE IF EXISTS `taxonomy_change_in`;
--- DROP TABLE IF EXISTS `taxonomy_change_out`;
--- DROP TABLE IF EXISTS `taxonomy_genome_coverage`;
--- DROP TABLE IF EXISTS `taxonomy_host_source`;
--- DROP TABLE IF EXISTS `taxonomy_json`;
--- DROP TABLE IF EXISTS `taxonomy_json_rank`;
--- DROP TABLE IF EXISTS `taxonomy_level`;
--- DROP TABLE IF EXISTS `taxonomy_molecule`;
--- DROP TABLE IF EXISTS `taxonomy_node`;
--- DROP TABLE IF EXISTS `taxonomy_node_delta`;
--- DROP TABLE IF EXISTS `taxonomy_node_merge_split`;
--- DROP TABLE IF EXISTS `taxonomy_toc`;
--- DROP TABLE IF EXISTS `virus_prop`;
--- SET foreign_key_checks = 1;
-
 -- taxonomy_node
 CREATE TABLE `taxonomy_node` (
   `taxnode_id` INT NOT NULL,
@@ -26,21 +7,21 @@ CREATE TABLE `taxonomy_node` (
   `level_id` INT,
   `name` VARCHAR(100),
   `ictv_id` INT,
-  `molecule_id` INT,
+  `molecule_id` INT, 
   `abbrev_csv` LONGTEXT,
   `genbank_accession_csv` LONGTEXT,
   `genbank_refseq_accession_csv` LONGTEXT,
   `refseq_accession_csv` LONGTEXT,
   `isolate_csv` LONGTEXT,
   `notes` LONGTEXT,
-  `is_ref` INT NOT NULL,
-  `is_official` INT NOT NULL,
-  `is_hidden` INT NOT NULL,
-  `is_deleted` INT NOT NULL,
-  `is_deleted_next_year` INT NOT NULL,
-  `is_typo` INT NOT NULL,
-  `is_renamed_next_year` INT NOT NULL,
-  `is_obsolete` INT NOT NULL,
+  `is_ref` INT NOT NULL DEFAULT 0,
+  `is_official` INT NOT NULL DEFAULT 0,
+  `is_hidden` INT NOT NULL DEFAULT 0,
+  `is_deleted` INT NOT NULL DEFAULT 0,
+  `is_deleted_next_year` INT NOT NULL DEFAULT 0,
+  `is_typo` INT NOT NULL DEFAULT 0,
+  `is_renamed_next_year` INT NOT NULL DEFAULT 0,
+  `is_obsolete` INT NOT NULL DEFAULT 0,
   `in_change` VARCHAR(10),
   `in_target` VARCHAR(255),
   `in_filename` VARCHAR(255),
@@ -49,7 +30,7 @@ CREATE TABLE `taxonomy_node` (
   `out_target` VARCHAR(255),
   `out_filename` VARCHAR(255),
   `out_notes` LONGTEXT,
-  `start_num_sort` INT,
+  `start_num_sort` INT DEFAULT NULL,
   `row_num` VARCHAR(25),
   `filename` VARCHAR(255),
   `xref` VARCHAR(255),
@@ -176,10 +157,3 @@ CREATE TABLE `taxonomy_node` (
   `host_source` VARCHAR(50),
   PRIMARY KEY (`taxnode_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
-
--- taxonomy_change_in
--- CREATE TABLE `taxonomy_change_in` (
---   `change` VARCHAR(10) NOT NULL,
---   `notes` TEXT,
---   PRIMARY KEY (`change`)
--- ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
