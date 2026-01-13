@@ -3,12 +3,10 @@ LOAD DATA LOCAL INFILE '../../../data/taxonomy_host_source.utf8.txt'
 INTO TABLE taxonomy_host_source
 CHARACTER SET utf8mb4
 FIELDS TERMINATED BY '\t'
-OPTIONALLY ENCLOSED BY '"'
-ESCAPED BY '"'
+OPTIONALLY ENCLOSED BY "'"
+ESCAPED BY ''
 LINES TERMINATED BY '\n'
 IGNORE 1 ROWS
 (
 host_source
 );
-
--- SELECT COUNT(*) AS total_count, '26' AS should_be FROM taxonomy_host_source;

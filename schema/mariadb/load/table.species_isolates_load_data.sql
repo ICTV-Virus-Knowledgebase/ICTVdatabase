@@ -3,8 +3,8 @@ LOAD DATA LOCAL INFILE '../../../data/species_isolates.utf8.txt'
 INTO TABLE species_isolates
 CHARACTER SET utf8mb4
 FIELDS TERMINATED BY '\t'
-OPTIONALLY ENCLOSED BY '"'
-ESCAPED BY '"'
+OPTIONALLY ENCLOSED BY "'"
+ESCAPED BY ''
 LINES TERMINATED BY '\n'
 IGNORE 1 ROWS
 (
@@ -31,13 +31,6 @@ IGNORE 1 ROWS
   @computed_col,               -- <-- Skip the _isolate_name column
   notes
 );
--- SET
---   taxnode_id            = NULLIF(NULLIF(@taxnode_id_s, ''), 'NULL'),
---   update_prev_taxnode_id= NULLIF(NULLIF(@update_prev_taxnode_id_s, ''), 'NULL'),
---   species_sort          = NULLIF(NULLIF(@species_sort_s, ''), 'NULL');
-
--- check number of rows:
--- SELECT COUNT(*) AS total_count, '16521' AS should_be FROM species_isolates;
 
 -- set auto increment column to the value of the last isolate_id + 1
 -- Now compute the next ID in a user variable

@@ -3,7 +3,12 @@ LOAD DATA LOCAL INFILE '../../../data/taxonomy_node_mariadb_etl.utf8.txt'
 INTO TABLE taxonomy_node
 CHARACTER SET utf8mb4
 FIELDS TERMINATED BY '\t'
-OPTIONALLY ENCLOSED BY '"'
+-- '"' shifts columns when there is a single " quote at the beginning of a field (fields are no longer enclosed entirely inside a ").
+-- However, since '"' is needed to read NULL as SQL NULL (and not as a string), changing it to "'" seems to read NULL as SQL NULL.
+-- While also avoiding the shifting when a field starts with a single " (ex: the field ```"acidum", after Latin acidus for acidic```)
+-- Was being read as ```acidum```.
+OPTIONALLY ENCLOSED BY "'"
+-- OPTIONALLY ENCLOSED BY '"'
 ESCAPED BY ''
 LINES TERMINATED BY '\n'
 IGNORE 1 ROWS
@@ -98,5 +103,3 @@ IGNORE 1 ROWS
   genome_coverage,
   host_source
 );
-
--- SELECT COUNT(*) AS total_count, '154166' AS should_be FROM taxonomy_node;
