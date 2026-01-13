@@ -20,14 +20,7 @@ IGNORE 1 ROWS
   is_renamed,
   is_new,
   is_deleted,
-  is_now_type,
-  @dummy_tag_csv,          
+  is_now_type,      
   is_lineage_updated,
-  msl,
-  @dummy_tag_csv2,         
-  @dummy_tag_csv_min
-)
-SET 
-  tag_csv = NULL,
-  tag_csv2 = NULL,
-  tag_csv_min = NULL;
+  msl
+);

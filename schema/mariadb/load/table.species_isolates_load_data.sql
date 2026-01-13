@@ -28,7 +28,7 @@ IGNORE 1 ROWS
   update_prev_species,
   update_prev_taxnode_id,
   update_change_proposal,
-  @computed_col,               -- <-- Skip the _isolate_name column
+  -- @computed_col,               -- <-- Skip the _isolate_name column
   notes
 );
 
