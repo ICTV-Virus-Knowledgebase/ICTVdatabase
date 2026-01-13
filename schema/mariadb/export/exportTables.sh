@@ -32,8 +32,30 @@ taxonomy_node_merge_split="taxonomy_node_merge_split"
 # Export table data to tsv formatted file
 #-----------------------------------------#
 
-# species_isolates
-mariadb -D "$DATABASE" --default-character-set=utf8mb4 --batch --raw -e "SELECT * FROM "$species_isolates" ORDER BY isolate_id" > "$DATA_DIR/species_isolates.utf8.txt"
+# species_isolates (exclude generated _isolate_name)
+mariadb -D "$DATABASE" --default-character-set=utf8mb4 --batch --raw -e "SELECT \
+  isolate_id, \
+  taxnode_id, \
+  species_sort, \
+  isolate_sort, \
+  species_name, \
+  isolate_type, \
+  isolate_names, \
+  isolate_abbrevs, \
+  isolate_designation, \
+  genbank_accessions, \
+  refseq_accessions, \
+  genome_coverage, \
+  molecule, \
+  host_source, \
+  refseq_organism, \
+  refseq_taxids, \
+  update_change, \
+  update_prev_species, \
+  update_prev_taxnode_id, \
+  update_change_proposal, \
+  notes \
+  FROM "$species_isolates" ORDER BY isolate_id" > "$DATA_DIR/species_isolates.utf8.txt"
 # taxonomy_toc
 mariadb -D "$DATABASE" --default-character-set=utf8mb4 --batch --raw -e "SELECT * FROM "$taxonomy_toc" ORDER BY msl_release_num" > "$DATA_DIR/taxonomy_toc.utf8.txt"
 # taxonomy_level
@@ -48,8 +70,24 @@ mariadb -D "$DATABASE" --default-character-set=utf8mb4 --batch --raw -e "SELECT 
 mariadb -D "$DATABASE" --default-character-set=utf8mb4 --batch --raw -e "SELECT * FROM "$taxonomy_change_in"" > "$DATA_DIR/taxonomy_change_in.utf8.txt"
 # taxonomy_change_out
 mariadb -D "$DATABASE" --default-character-set=utf8mb4 --batch --raw -e "SELECT * FROM "$taxonomy_change_out"" > "$DATA_DIR/taxonomy_change_out.utf8.txt"
-# taxonomy_node_delta
-mariadb -D "$DATABASE" --default-character-set=utf8mb4 --batch --raw -e "SELECT * FROM "$taxonomy_node_delta" ORDER BY msl, prev_taxid, new_taxid" > "$DATA_DIR/taxonomy_node_delta.utf8.txt"
+# taxonomy_node_delta (exclude generated tag_csv columns)
+mariadb -D "$DATABASE" --default-character-set=utf8mb4 --batch --raw -e "SELECT \
+  prev_taxid, \
+  new_taxid, \
+  proposal, \
+  notes, \
+  is_merged, \
+  is_split, \
+  is_moved, \
+  is_promoted, \
+  is_demoted, \
+  is_renamed, \
+  is_new, \
+  is_deleted, \
+  is_now_type, \
+  is_lineage_updated, \
+  msl \
+  FROM "$taxonomy_node_delta" ORDER BY msl, prev_taxid, new_taxid" > "$DATA_DIR/taxonomy_node_delta.utf8.txt"
 # taxonomy_node_merge_split
 mariadb -D "$DATABASE" --default-character-set=utf8mb4 --batch --raw -e "SELECT * FROM "$taxonomy_node_merge_split" ORDER BY prev_ictv_id, next_ictv_id" > "$DATA_DIR/taxonomy_node_merge_split.utf8.txt"
 
