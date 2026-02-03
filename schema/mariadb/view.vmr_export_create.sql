@@ -54,16 +54,19 @@ SELECT
     END                                                       AS `QC_status`,
     tn.inher_molecule                                         AS `QC_taxon_inher_molecule`,
     IFNULL(si.update_change,'')                               AS `QC_taxon_change`,
-    IFNULL(
-      CONCAT(
+
+    -- LRM 02-03-2025: Return '' when si.update_change_proposal is NULL
+    CASE
+      WHEN si.update_change_proposal IS NULL
+        OR si.update_change_proposal = '' THEN ''
+      ELSE CONCAT(
         '=HYPERLINK("https://ictv.global/ictv/proposals/',
-        IFNULL(si.update_change_proposal,''),
+        si.update_change_proposal,
         '","',
-        REPLACE(IFNULL(si.update_change_proposal,''), '"', '""'),
+        REPLACE(si.update_change_proposal, '"', '""'),
         '")'
-      ),
-      ''
-    )                                                         AS `QC_taxon_proposal`
+      )
+    END                                                       AS `QC_taxon_proposal`
 FROM `species_isolates` AS si
 JOIN `taxonomy_node_names` AS tn
   ON tn.taxnode_id = si.taxnode_id
