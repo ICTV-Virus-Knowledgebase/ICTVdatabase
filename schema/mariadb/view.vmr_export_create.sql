@@ -55,7 +55,7 @@ SELECT
     tn.inher_molecule                                         AS `QC_taxon_inher_molecule`,
     IFNULL(si.update_change,'')                               AS `QC_taxon_change`,
 
-    -- LRM 02-03-2025: Return '' when si.update_change_proposal is NULL
+    -- LRM 02-03-2026: Return '' when si.update_change_proposal is NULL
     CASE
       WHEN si.update_change_proposal IS NULL
         OR si.update_change_proposal = '' THEN ''
