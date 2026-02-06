@@ -150,10 +150,11 @@ CREATE TABLE `taxonomy_node` (
     RTRIM(LTRIM(REVERSE(SUBSTRING(REPLACE(REVERSE(`out_target`), ';', REPEAT(' ', 1000)), 500, 1500))))
   ) PERSISTENT,
   `_out_target_name` VARCHAR(255) GENERATED ALWAYS AS (
-    RTRIM(LTRIM(REVERSE(SUBSTRING(REPLACE(REVERSE(`out_target`), ';', REPEAT(' ', 1000)), 0, 500))))
+    TRIM(SUBSTRING_INDEX(`out_target`, ';', -1))
   ) PERSISTENT,
   `exemplar_name` LONGTEXT,
   `genome_coverage` VARCHAR(50),
   `host_source` VARCHAR(50),
   PRIMARY KEY (`taxnode_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB DEFAULT CHARSET = utf8mb4
+  COLLATE = utf8mb4_general_ci;
