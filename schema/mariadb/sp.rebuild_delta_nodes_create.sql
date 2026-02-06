@@ -2,6 +2,12 @@
    Stored procedure  : rebuild_delta_nodes
    Converted from    : SQL-Server to MariaDB on 08042025
    ================================================================ */
+/* ================================================================
+    LRM 02062025: Switch to utf8mb4_uca1400_as_cs from utf8mb4_bin.
+   utf8mb4_uca1400_as_cs, I think matches collation used in SQL
+   Server version better
+   ================================================================ */
+
 DELIMITER //
 
 DROP PROCEDURE IF EXISTS rebuild_delta_nodes //
@@ -37,7 +43,11 @@ BEGIN
         p.taxnode_id,
         n.taxnode_id,
         n.in_filename                                               AS proposal,
-        CONCAT_WS('', IFNULL(CONCAT('[',p_debug_notes,'NEW/SPLIT];'),''), n.in_notes)  AS notes,
+        -- LRM 02062026: CONCAT_WS does not treat empty strings as NULL, switch to a CASE that preserves NULLs
+        CASE
+            WHEN p_debug_notes IS NULL THEN n.in_notes
+            ELSE CONCAT('[',p_debug_notes,'NEW/SPLIT];', COALESCE(n.in_notes,''))
+        END                                                         AS notes,
         (n.in_change='new')                                         AS is_new,
         (n.in_change='split')                                       AS is_split,
         CASE
@@ -47,12 +57,12 @@ BEGIN
         END                                                         AS is_now_type,
         IF(p.level_id IS NOT NULL AND n.level_id IS NOT NULL AND p.level_id > n.level_id, 1, 0) AS is_promoted,
         IF(p.level_id IS NOT NULL AND n.level_id IS NOT NULL AND p.level_id < n.level_id, 1, 0) AS is_demoted
-        -- (p.level_id > n.level_id)                                   AS is_promoted,
-        -- (p.level_id < n.level_id)                                   AS is_demoted
     FROM taxonomy_node AS n
     LEFT JOIN taxonomy_node AS p  ON p.msl_release_num = n.msl_release_num-1
-                                 AND n.in_target COLLATE utf8mb4_bin IN (p.lineage, p.name)
-    LEFT JOIN taxonomy_node_delta d ON d.new_taxid = n.taxnode_id
+                                 AND n.in_target COLLATE utf8mb4_uca1400_as_cs IN (p.lineage, p.name)
+    LEFT JOIN taxonomy_node_delta d
+    ON d.msl = p_msl
+    AND d.new_taxid = n.taxnode_id
     WHERE n.in_change IN ('new','split')
       AND d.new_taxid IS NULL
       AND n.msl_release_num = p_msl
@@ -72,31 +82,28 @@ BEGIN
         s.prev_taxid,
         s.new_taxid,
         s.proposal,
-        CONCAT_WS('', IFNULL(CONCAT('[',p_debug_notes,'RENAME,MERGE,PROMOTE,MOVE,ABOLISH];'),''), s.notes),
+        -- LRM 02062026: CONCAT_WS does not treat empty strings as NULL, switch to a CASE that preserves NULLs
+        CASE
+            WHEN p_debug_notes IS NULL THEN s.notes
+            ELSE CONCAT('[',p_debug_notes,'RENAME,MERGE,PROMOTE,MOVE,ABOLISH];', COALESCE(s.notes,''))
+        END,
         IF(
             next_msl.name IS NOT NULL
             AND prev_msl.name IS NOT NULL
-            AND prev_msl.name <> next_msl.name COLLATE utf8mb4_bin
+            AND prev_msl.name <> next_msl.name COLLATE utf8mb4_uca1400_as_cs
             AND COALESCE(s.is_merged,0) = 0,
             1, 0
         ) AS is_renamed,
-        -- (prev_msl.name <> next_msl.name COLLATE utf8mb4_bin
-        --  AND s.is_merged = 0)                                       AS is_renamed,
         s.is_merged,
         IF(
             next_pmsl.lineage IS NOT NULL
             AND prev_pmsl.lineage IS NOT NULL
-            AND prev_pmsl.lineage <> next_pmsl.lineage COLLATE utf8mb4_bin
+            AND prev_pmsl.lineage <> next_pmsl.lineage COLLATE utf8mb4_uca1400_as_cs
             AND (prev_pmsl.level_id<>100 OR next_pmsl.level_id<>100),
             1, 0
         ) AS is_lineage_updated,
-        -- (prev_pmsl.lineage <> next_pmsl.lineage COLLATE utf8mb4_bin
-        --  AND (prev_pmsl.level_id<>100 OR next_pmsl.level_id<>100))  AS is_lineage_updated,
          IF(next_msl.level_id IS NOT NULL AND prev_msl.level_id > next_msl.level_id, 1, 0) AS is_promoted,
          IF(next_msl.level_id IS NOT NULL AND prev_msl.level_id < next_msl.level_id, 1, 0) AS is_demoted,
-
-        -- (prev_msl.level_id > next_msl.level_id)                     AS is_promoted,
-        -- (prev_msl.level_id < next_msl.level_id)                     AS is_demoted,
         CASE
             WHEN prev_msl.is_ref=1 AND next_msl.is_ref=0 THEN -1
             WHEN prev_msl.is_ref=0 AND next_msl.is_ref=1 THEN  1
@@ -126,19 +133,22 @@ BEGIN
         FROM taxonomy_node            p
         LEFT JOIN taxonomy_node       targ
               ON targ.msl_release_num = p.msl_release_num+1
-             AND (p.out_target COLLATE utf8mb4_bin IN (targ.lineage,targ.name)
-                  OR p._out_target_name COLLATE utf8mb4_bin = targ.name)
+             AND (p.out_target COLLATE utf8mb4_uca1400_as_cs IN (targ.lineage,targ.name)
+                  OR p._out_target_name COLLATE utf8mb4_uca1400_as_cs = targ.name)
              AND p.is_deleted = 0
         LEFT JOIN taxonomy_node targ_child
               ON targ_child.parent_id = targ.taxnode_id
-             AND (targ_child.name = p.name COLLATE utf8mb4_bin
-                  OR targ_child.name = p.out_target COLLATE utf8mb4_bin)
+             AND (targ_child.name = p.name COLLATE utf8mb4_uca1400_as_cs
+                  OR targ_child.name = p.out_target COLLATE utf8mb4_uca1400_as_cs)
              AND targ_child.level_id = p.level_id
              AND p.out_change <> 'promote'
              AND targ_child.name <> 'Unassigned'
              AND targ_child.is_hidden = 0
+        -- LEFT JOIN taxonomy_node_delta d
+        --       ON d.prev_taxid = p.taxnode_id
         LEFT JOIN taxonomy_node_delta d
-              ON d.prev_taxid = p.taxnode_id
+            ON d.msl = p_msl
+            AND d.prev_taxid = p.taxnode_id
         WHERE p.out_change IS NOT NULL
           AND p.msl_release_num = p_msl-1
           AND d.prev_taxid IS NULL
@@ -162,11 +172,14 @@ BEGIN
         p.taxnode_id,
         n.taxnode_id,
         p.out_filename,
-        CONCAT_WS('', IFNULL(CONCAT('[',p_debug_notes,'NO CHANGE];'),''), p.out_notes),
+        CASE
+            WHEN p_debug_notes IS NULL THEN p.out_notes
+            ELSE CONCAT('[',p_debug_notes,'NO CHANGE];', COALESCE(p.out_notes,''))
+        END,
         IF(
             pp.lineage IS NOT NULL
             AND pn.lineage IS NOT NULL
-            AND pp.lineage <> pn.lineage COLLATE utf8mb4_bin
+            AND pp.lineage <> pn.lineage COLLATE utf8mb4_uca1400_as_cs
             AND pp.level_id<>100,
             1, 0
         )                                                   AS is_lineage_updated,
@@ -183,14 +196,22 @@ BEGIN
     JOIN taxonomy_node n
          ON n.msl_release_num = p.msl_release_num+1
         AND ( n.lineage = p.lineage
-           OR (n.name = p.name COLLATE utf8mb4_bin
+           OR (n.name = p.name COLLATE utf8mb4_uca1400_as_cs
                AND n.name<>'Unassigned' AND n.level_id=p.level_id)
            OR (n.level_id=100 AND p.level_id=100) )
+    -- LEFT JOIN taxonomy_node_delta pd
+    --      ON pd.prev_taxid = p.taxnode_id
+    --     AND pd.is_split  = 0
+    -- LEFT JOIN taxonomy_node_delta nd
+    --      ON nd.new_taxid = n.taxnode_id
+    --     AND nd.is_merged = 0
     LEFT JOIN taxonomy_node_delta pd
-         ON pd.prev_taxid = p.taxnode_id
-        AND pd.is_split  = 0
+        ON pd.msl = p_msl
+        AND pd.prev_taxid = p.taxnode_id
+        AND pd.is_split = 0
     LEFT JOIN taxonomy_node_delta nd
-         ON nd.new_taxid = n.taxnode_id
+        ON nd.msl = p_msl
+        AND nd.new_taxid = n.taxnode_id
         AND nd.is_merged = 0
     JOIN taxonomy_node pp ON pp.taxnode_id = p.parent_id
     JOIN taxonomy_node pn ON pn.taxnode_id = n.parent_id
@@ -228,75 +249,58 @@ BEGIN
             1)
         * IF(prev_parent.level_id = 100 AND next_parent.level_id = 100, 0, 1)
         ),
-    d.notes = IF(
-        (
+        d.notes = CASE
+        WHEN
+            (
             IF(prev_parent.ictv_id IS NOT NULL AND next_parent.ictv_id IS NOT NULL
-            AND prev_parent.ictv_id <> next_parent.ictv_id, 1, 0)
-        * IF(COALESCE(prev_node.out_change, '') NOT LIKE '%promot%', 1, 0)
-        * IF(COALESCE(prev_node.out_change, '') NOT LIKE '%demot%', 1, 0)
-        * IF(COALESCE(parent_delta.is_merged, 0) = 1, 0, 1)
-        * IF(COALESCE(parent_delta.is_split, 0) = 1,
-            IF(prev_parent.ictv_id IS NOT NULL AND next_parent.ictv_id IS NOT NULL
-                AND prev_parent.ictv_id <> next_parent.ictv_id, 1, 0),
-            1)
-        * IF(prev_parent.level_id = 100 AND next_parent.level_id = 100, 0, 1)
-        ) = 1,
-        CONCAT('[',p_debug_notes,'SET MOVED=1];', d.notes),
-        d.notes
-        )
-    WHERE prev_node.msl_release_num + 1 = p_msl;
-
-    -- UPDATE taxonomy_node_delta AS d
-    -- /* parent / node look-ups */
-    -- LEFT JOIN taxonomy_node_names prev_node  ON prev_node.taxnode_id = d.prev_taxid
-    -- LEFT JOIN taxonomy_node prev_parent      ON prev_parent.taxnode_id = prev_node.parent_id
-    -- LEFT JOIN taxonomy_node_names next_node  ON next_node.taxnode_id = d.new_taxid
-    -- LEFT JOIN taxonomy_node next_parent      ON next_parent.taxnode_id = next_node.parent_id
-    -- LEFT JOIN taxonomy_node_delta parent_delta
-    --        ON parent_delta.prev_taxid = prev_parent.taxnode_id
-    --       AND parent_delta.new_taxid  = next_parent.taxnode_id
-    -- SET d.is_moved = (
-    --       (prev_parent.ictv_id <> next_parent.ictv_id)
-    --     * (prev_node.out_change NOT LIKE '%promot%')
-    --     * (prev_node.out_change NOT LIKE '%demot%')
-    --     * IF(parent_delta.is_merged = 1, 0, 1)
-    --     * IF(parent_delta.is_split  = 1,
-    --          (prev_parent.ictv_id <> next_parent.ictv_id), 1)
-    --     * IF(prev_parent.level_id = 100 AND next_parent.level_id=100, 0, 1)
-    --   ),
-    --   d.notes = IF(
-    --       ( (prev_parent.ictv_id <> next_parent.ictv_id)
-    --       * (prev_node.out_change NOT LIKE '%promot%')
-    --       * (prev_node.out_change NOT LIKE '%demot%')
-    --       * IF(parent_delta.is_merged=1,0,1)
-    --       * IF(parent_delta.is_split=1,
-    --            (prev_parent.ictv_id <> next_parent.ictv_id),1)
-    --       * IF(prev_parent.level_id=100 AND next_parent.level_id=100,0,1) )
-    --       = 1,
-    --       CONCAT('[',p_debug_notes,'SET MOVED=1];',d.notes),
-    --       d.notes
-    --   )
-    -- WHERE prev_node.msl_release_num+1 = p_msl;
+                AND prev_parent.ictv_id <> next_parent.ictv_id, 1, 0)
+            * IF(COALESCE(prev_node.out_change, '') NOT LIKE '%promot%', 1, 0)
+            * IF(COALESCE(prev_node.out_change, '') NOT LIKE '%demot%', 1, 0)
+            * IF(COALESCE(parent_delta.is_merged, 0) = 1, 0, 1)
+            * IF(COALESCE(parent_delta.is_split, 0) = 1,
+                IF(prev_parent.ictv_id IS NOT NULL AND next_parent.ictv_id IS NOT NULL
+                    AND prev_parent.ictv_id <> next_parent.ictv_id, 1, 0),
+                1)
+            * IF(prev_parent.level_id = 100 AND next_parent.level_id = 100, 0, 1)
+            ) = 1
+            AND p_debug_notes IS NOT NULL
+            AND d.notes IS NOT NULL
+            AND d.notes <> ''
+        THEN CONCAT('[', p_debug_notes, 'SET MOVED=1];', d.notes)
+        ELSE d.notes
+        END
+        WHERE d.msl = p_msl
+            AND prev_node.msl_release_num + 1 = p_msl;
 
     /* -------------------------------------------------------------
        UPGRADE rename → merge when N:1
     ------------------------------------------------------------- */
+
+    -- LRM 02062026: Re-worked to take MAX(notes) among siblings and write it back to all siblings
+    -- Before, this snippet was not getting the right value in the notes column for some rows
+
     UPDATE taxonomy_node_delta AS d
     JOIN (
-       SELECT new_taxid
-       FROM taxonomy_node_delta
-       WHERE msl = p_msl
-       GROUP BY new_taxid
-       HAVING COUNT(*) > 1
-    ) AS msrc USING (new_taxid)
-    SET d.is_merged  = 1,
-        d.is_renamed = 0,
-        d.proposal   = (SELECT MAX(p2.proposal)
-                        FROM taxonomy_node_delta p2
-                        WHERE p2.msl=p_msl AND p2.new_taxid=msrc.new_taxid),
-        d.notes      = CONCAT('[',p_debug_notes,'UPGRADE_TO_MERGE];', d.notes)
+        SELECT
+            new_taxid,
+            MAX(proposal) AS proposal,
+            MAX(notes)    AS notes
+        FROM taxonomy_node_delta
+        WHERE msl = p_msl
+        GROUP BY new_taxid
+        HAVING COUNT(*) > 1
+    ) AS msrc
+    ON msrc.new_taxid = d.new_taxid
+    SET
+    d.is_merged  = 1,
+    d.is_renamed = 0,
+    d.proposal   = msrc.proposal,
+    d.notes      = CASE
+        WHEN p_debug_notes IS NULL THEN msrc.notes
+        ELSE CONCAT('[', p_debug_notes, 'UPGRADE_TO_MERGE];', msrc.notes)
+    END
     WHERE d.msl = p_msl
-      AND d.is_merged = 0;
+    AND d.is_merged = 0;
 
 END //
 DELIMITER ;
