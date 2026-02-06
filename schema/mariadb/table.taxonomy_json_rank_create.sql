@@ -7,4 +7,5 @@ CREATE TABLE `taxonomy_json_rank` (
   PRIMARY KEY (`id`),
   UNIQUE `UK_taxonomy_json_rank` (`level_id`, `tree_id`),
   UNIQUE `UK_taxonomy_json_rank_rank_tree` (`rank_index`, `tree_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB DEFAULT CHARSET = utf8mb4
+  COLLATE = utf8mb4_general_ci;

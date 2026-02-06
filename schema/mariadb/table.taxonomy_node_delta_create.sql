@@ -47,4 +47,5 @@ CREATE TABLE `taxonomy_node_delta`(
         IF(`is_promoted`=1, 'Promoted,', ''),
         IF(`is_demoted`=1, 'Demoted,', '')
     )) PERSISTENT
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB DEFAULT CHARSET = utf8mb4
+  COLLATE = utf8mb4_general_ci;
