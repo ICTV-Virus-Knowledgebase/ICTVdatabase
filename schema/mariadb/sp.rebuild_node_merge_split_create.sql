@@ -47,8 +47,13 @@ BEGIN
              dist,       rev_count)
     SELECT  p.ictv_id,
             n.ictv_id,
-            d.is_merged,
-            d.is_split,
+            /* NOTE: taxonomy_node_delta can contain multiple rows that map to the
+               same (p.ictv_id, n.ictv_id) pair. Because the target table has a
+               composite PRIMARY KEY (prev_ictv_id, next_ictv_id), we must
+               dedupe here to avoid duplicate-key errors (1062).
+               These columns are counts, so SUM() is the correct aggregation. */
+            SUM(COALESCE(d.is_merged, 0)),
+            SUM(COALESCE(d.is_split, 0)),
             0,
             1,
             0
@@ -60,7 +65,8 @@ BEGIN
       AND   p.ictv_id           <> n.ictv_id
       AND   p.msl_release_num   = n.msl_release_num - 1
       AND   p.is_hidden = 0
-      AND   n.is_hidden = 0;
+      AND   n.is_hidden = 0
+    GROUP BY p.ictv_id, n.ictv_id;
 
     /* ***************************
        4.  Reverse links (dist = 1)
@@ -71,8 +77,10 @@ BEGIN
              dist,       rev_count)
     SELECT  n.ictv_id,
             p.ictv_id,
-            d.is_merged,
-            d.is_split,
+            /* Same dedupe/boolean aggregation as forward links, but reversed
+               direction and rev_count=1. */
+            SUM(COALESCE(d.is_merged, 0)),
+            SUM(COALESCE(d.is_split, 0)),
             0,
             1,
             1           -- <<< reverse
@@ -84,7 +92,8 @@ BEGIN
       AND   p.ictv_id           <> n.ictv_id
       AND   p.msl_release_num   = n.msl_release_num - 1
       AND   p.is_hidden = 0
-      AND   n.is_hidden = 0;
+      AND   n.is_hidden = 0
+    GROUP BY n.ictv_id, p.ictv_id;
 
     /* ***************************
        5.  Resurrection links (dist = 1)
@@ -106,7 +115,10 @@ BEGIN
         dir.rev_count
     FROM  ( SELECT 0 AS rev_count UNION ALL SELECT 1 ) AS dir
     JOIN  taxonomy_node_dx  AS early
-      ON  early.next_tags LIKE '%Abolish%'             -- abolished taxon
+      ON  1=1
+      /* SQL Server version does not require early.next_tags LIKE '%Abolish%'.
+         Keep the same behavior here for parity: any name-match with a later
+         non-overlapping lifetime can be treated as a recreation candidate. */
     JOIN  taxonomy_node_dx  AS late
       ON  late.name             = early.name
      AND  late.msl_release_num  > early.msl_release_num
@@ -115,9 +127,18 @@ BEGIN
     WHERE NOT EXISTS (
              SELECT 1
              FROM   taxonomy_node_merge_split ms
-             WHERE  ms.prev_ictv_id = early.ictv_id
-               AND  ms.next_ictv_id = late.ictv_id
-          );
+             /* Direction-aware existence check: we insert both forward and
+                backward resurrection links (dir.rev_count 0/1), so the NOT
+                EXISTS must match the *actual* pair being inserted. */
+             WHERE  ms.prev_ictv_id = CASE WHEN dir.rev_count = 0 THEN early.ictv_id ELSE late.ictv_id END
+               AND  ms.next_ictv_id = CASE WHEN dir.rev_count = 0 THEN late.ictv_id  ELSE early.ictv_id END
+          )
+    /* taxonomy_node_dx can have duplicate rows; collapse to unique pairs so we
+       don't attempt to insert the same PK more than once. */
+    GROUP BY
+        CASE WHEN dir.rev_count = 0 THEN early.ictv_id ELSE late.ictv_id END,
+        CASE WHEN dir.rev_count = 0 THEN late.ictv_id  ELSE early.ictv_id END,
+        dir.rev_count;
 
     /* ==================================================================
        6.  Transitive closure:
@@ -133,9 +154,12 @@ BEGIN
                  dist,       rev_count)
         SELECT  p.prev_ictv_id,
                 n.next_ictv_id,
-                MAX(p.is_merged + n.is_merged  > 0),
-                MAX(p.is_split  + n.is_split   > 0),
-                MAX(p.is_recreated + n.is_recreated > 0),
+                /* Match SQL Server semantics: treat these as counts computed
+                   from the composed path (p -> mid -> n), then collapse
+                   multiple paths between the same endpoints by taking MAX. */
+                MAX(p.is_merged + n.is_merged),
+                MAX(p.is_split  + n.is_split),
+                MAX(p.is_recreated + n.is_recreated),
                 MIN(p.dist + n.dist),
                 SUM(p.rev_count + n.rev_count)
         FROM    taxonomy_node_merge_split AS p
