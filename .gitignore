@@ -8,3 +8,5 @@ backups/
 .Rhistory
 # mac osx
 .DS_Store
+# Notes
+notes.txt
