@@ -16,7 +16,8 @@ ALTER TABLE `taxonomy_node_merge_split`
 ALTER TABLE `species_isolates` 
 ADD CONSTRAINT `FK_species_isolates_taxonomy_genome_coverage` 
 FOREIGN KEY (`genome_coverage`) 
-REFERENCES `taxonomy_genome_coverage` (`name`);
+REFERENCES `taxonomy_genome_coverage` (`name`)
+ON UPDATE CASCADE;
 
 ALTER TABLE `species_isolates` 
 ADD CONSTRAINT `FK_species_isolates_taxonomy_host_source` 
