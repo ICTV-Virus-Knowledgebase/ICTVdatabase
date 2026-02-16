@@ -70,4 +70,5 @@ SELECT
 FROM `species_isolates` AS si
 JOIN `taxonomy_node_names` AS tn
   ON tn.taxnode_id = si.taxnode_id
-WHERE tn.species <> 'abolished';
+WHERE tn.species <> 'abolished'
+ORDER BY si.species_sort, si.isolate_sort;

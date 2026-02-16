@@ -104,7 +104,7 @@ mariadb -D "$DATABASE" --default-character-set=utf8mb4 --batch --raw -e "SELECT 
 mariadb -D "$DATABASE" --default-character-set=utf8mb4 --batch --raw -e "SELECT * FROM "$taxonomy_node_merge_split" ORDER BY prev_ictv_id, next_ictv_id" > "$DATA_DIR/taxonomy_node_merge_split.utf8.txt"
 
 # vmr_export
-mariadb -D "$DATABASE" --default-character-set=utf8mb4 --batch --raw -e "SELECT * FROM "$vmr_export" ORDER BY \`Species Sort\`, \`Isolate Sort\`" > "$DATA_DIR/vmr_export.utf8.txt"
+mariadb -D "$DATABASE" --default-character-set=utf8mb4 --batch --raw -e "SELECT * FROM "$vmr_export"" > "$DATA_DIR/vmr_export.utf8.txt"
 
 # taxonomy_node
 mariadb -D "$DATABASE" --default-character-set=utf8mb4 --batch --raw \
