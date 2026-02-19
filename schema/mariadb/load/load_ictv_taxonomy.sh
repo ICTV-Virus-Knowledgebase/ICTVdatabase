@@ -171,7 +171,7 @@ mariadb -D "$DBNAME" -vvv --show-warnings < "$SCHEMA_DIR/sp.QC_module_taxonomy_n
 # I do not think QC_module_virus_prop_tabs is needed as we no longer have the virus_prop table
 # mariadb -D "$DBNAME" -vvv --show-warnings < "$SCHEMA_DIR/sp.QC_module_virus_prop_tabs_create.sql"
 mariadb -D "$DBNAME" -vvv --show-warnings < "$SCHEMA_DIR/sp.QC_module_vmr_export_species_count_create.sql"
-mariadb -D "$DBNAME" -vvv --show-warnings < "$SCHEMA_DIR/sp.QC_module_taxonomy_toc_needs_reindex.sql"
+mariadb -D "$DBNAME" -vvv --show-warnings < "$SCHEMA_DIR/sp.QC_module_taxonomy_toc_needs_reindex_create.sql"
 mariadb -D "$DBNAME" -vvv --show-warnings < "$SCHEMA_DIR/sp.rebuild_delta_nodes_create.sql"
 mariadb -D "$DBNAME" -vvv --show-warnings < "$SCHEMA_DIR/sp.searchTaxonomy_create.sql"
 mariadb -D "$DBNAME" -vvv --show-warnings < "$SCHEMA_DIR/sp.simplify_molecule_id_settings_create.sql"
