@@ -168,8 +168,10 @@ mariadb -D "$DBNAME" -vvv --show-warnings < "$SCHEMA_DIR/sp.QC_module_taxonomy_n
 mariadb -D "$DBNAME" -vvv --show-warnings < "$SCHEMA_DIR/sp.QC_module_taxonomy_node_hidden_nodes_create.sql"
 mariadb -D "$DBNAME" -vvv --show-warnings < "$SCHEMA_DIR/sp.QC_module_taxonomy_node_ictv_resurrection_create.sql"
 mariadb -D "$DBNAME" -vvv --show-warnings < "$SCHEMA_DIR/sp.QC_module_taxonomy_node_orphan_taxa_create.sql"
-mariadb -D "$DBNAME" -vvv --show-warnings < "$SCHEMA_DIR/sp.QC_module_virus_prop_tabs_create.sql"
+# I do not think QC_module_virus_prop_tabs is needed as we no longer have the virus_prop table
+# mariadb -D "$DBNAME" -vvv --show-warnings < "$SCHEMA_DIR/sp.QC_module_virus_prop_tabs_create.sql"
 mariadb -D "$DBNAME" -vvv --show-warnings < "$SCHEMA_DIR/sp.QC_module_vmr_export_species_count_create.sql"
+mariadb -D "$DBNAME" -vvv --show-warnings < "$SCHEMA_DIR/sp.QC_module_taxonomy_toc_needs_reindex.sql"
 mariadb -D "$DBNAME" -vvv --show-warnings < "$SCHEMA_DIR/sp.rebuild_delta_nodes_create.sql"
 mariadb -D "$DBNAME" -vvv --show-warnings < "$SCHEMA_DIR/sp.searchTaxonomy_create.sql"
 mariadb -D "$DBNAME" -vvv --show-warnings < "$SCHEMA_DIR/sp.simplify_molecule_id_settings_create.sql"
@@ -179,8 +181,7 @@ mariadb -D "$DBNAME" -vvv --show-warnings < "$SCHEMA_DIR/sp.taxonomy_node_comput
 mariadb -D "$DBNAME" -vvv --show-warnings < "$SCHEMA_DIR/sp.rebuild_node_merge_split_create.sql"
 
 # Triggers
-# Not yet created
-# mariadb -D "$DBNAME" -vvv --show-warnings < tr.taxonomy_node_UPDATE_indexes.sql
+mariadb -D "$DBNAME" -vvv --show-warnings < "$SCHEMA_DIR/tr.taxonomy_node_UPDATE_indexes.sql"
 
 # Run SPs to populate taxonomy_json and taxonomy_json_rank
 mariadb -D "$DBNAME" -vvv --show-warnings < populate_taxonomy_json_rank.sql

@@ -2,7 +2,7 @@
    Stored procedure  : taxonomy_node_compute_indexes
    Converted from    : SQL-Server to MariaDB
    Preserves         : All original comments and behaviour
-   Tested on         : MariaDB 10.11
+   Tested on         : MariaDB 11.8
    ================================================================ */
 DELIMITER $$
 
@@ -80,6 +80,25 @@ BEGIN
             k_class_desc_ct,      k_subclass_desc_ct,  k_order_desc_ct,
             k_suborder_desc_ct,   k_family_desc_ct,    k_subfamily_desc_ct,
             k_genus_desc_ct,      k_subgenus_desc_ct,  k_species_desc_ct  INT;
+
+    /* child call context; keeps recursive INOUT params from leaking across siblings */
+    DECLARE c_realm_id,      c_subrealm_id,  c_kingdom_id,
+            c_subkingdom_id, c_phylum_id,    c_subphylum_id,
+            c_class_id,      c_subclass_id,  c_order_id,
+            c_suborder_id,   c_family_id,    c_subfamily_id,
+            c_genus_id,      c_subgenus_id,  c_species_id  INT;
+    DECLARE c_inher_molecule_id INT;
+    DECLARE c_lineage VARCHAR(1000);
+    DECLARE v_is_root_reindex_call TINYINT DEFAULT 0;
+    DECLARE v_prev_skip_taxonomy_node_reindex_flag INT DEFAULT 0;
+
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION
+    BEGIN
+        IF v_is_root_reindex_call = 1 THEN
+            SET @skip_taxonomy_node_reindex_flag = v_prev_skip_taxonomy_node_reindex_flag;
+        END IF;
+        RESIGNAL;
+    END;
     
     /* -----------------------------------------------------------------
     MariaDB does not like defaults in parameter list
@@ -87,6 +106,20 @@ BEGIN
      ----------------------------------------------------------------- */
 	IF p_left_idx   IS NULL THEN SET p_left_idx   := 1; END IF;
     IF p_node_depth IS NULL THEN SET p_node_depth := 1; END IF;
+
+    IF p_left_idx = 1
+       AND p_node_depth = 1
+       AND EXISTS (
+           SELECT 1
+             FROM taxonomy_node AS root_node
+            WHERE root_node.taxnode_id = p_taxnode_id
+              AND root_node.tree_id = p_taxnode_id
+            LIMIT 1
+       ) THEN
+        SET v_is_root_reindex_call = 1;
+        SET v_prev_skip_taxonomy_node_reindex_flag = IFNULL(@skip_taxonomy_node_reindex_flag, 0);
+        SET @skip_taxonomy_node_reindex_flag = 1;
+    END IF;
 
     /* -----------------------------------------------------------------
        Read this node once (rank, flags, etc.)
@@ -110,7 +143,7 @@ BEGIN
           IFNULL(p_species_id    , CASE WHEN l.name='species'     THEN n.taxnode_id END),
 
           /* inherit molecule */
-          COALESCE(n.molecule_id , p_inher_molecule_id),
+          COALESCE(n.molecule_id , p_inher_molecule_id, n.inher_molecule_id),
 
           /* decide whether this node’s name belongs in children’s lineage */
           CASE 
@@ -138,7 +171,7 @@ BEGIN
           v_use_my_lineage,
           v_my_lineage
      FROM  taxonomy_node  AS n
-     JOIN  taxonomy_level AS l  ON l.id = n.level_id
+     LEFT JOIN taxonomy_level AS l ON l.id = n.level_id
      WHERE n.taxnode_id = p_taxnode_id;
 
     /* -----------------------------------------------------------------
@@ -196,6 +229,13 @@ BEGIN
         SET p_lineage = v_my_lineage;
     END IF;
 
+    /* matches SQL Server logic: force children to be re-walked in sort order */
+    UPDATE taxonomy_node
+       SET left_idx = NULL,
+           right_idx = NULL
+     WHERE parent_id = p_taxnode_id
+       AND taxnode_id <> p_taxnode_id;
+
     /* -----------------------------------------------------------------
        Walk children (recursion).  Re-implements the T-SQL loop that
        repeatedly “SELECT TOP 1 … WHERE left_idx IS NULL … ORDER BY …”
@@ -205,32 +245,40 @@ BEGIN
 
     child_loop: LOOP
         /* -------- get next child that still has NULL left_idx -------- */
-        SELECT n.taxnode_id,
-               n.is_hidden,
-               l.name
-          INTO v_child_taxnode_id,
-               v_child_is_hidden,
-               v_child_rank
-          FROM taxonomy_node AS n
-          JOIN taxonomy_level AS l  ON l.id = n.level_id
-         WHERE n.parent_id   = p_taxnode_id
-           AND n.taxnode_id <> p_taxnode_id
-           AND n.left_idx   IS NULL
-         ORDER BY n.level_id,
-                  CASE
-                       WHEN n.start_num_sort IS NULL
-                              THEN IFNULL(n.name,'ZZZZ')
-                       ELSE LEFT(n.name, n.start_num_sort)
-                  END,
-                  CASE
-                       WHEN n.start_num_sort IS NULL
-                              THEN NULL
-                       ELSE CAST(
-                       			TRIM(LEADING ' '
-                       				FROM SUBSTRING(n.name, n.start_num_sort + 1)
-                       ) AS UNSIGNED)
-                  END
-         LIMIT 1;
+        BEGIN
+            DECLARE CONTINUE HANDLER FOR NOT FOUND SET v_child_taxnode_id = NULL;
+
+            SET v_child_taxnode_id = NULL;
+            SET v_child_is_hidden = NULL;
+            SET v_child_rank = NULL;
+
+            SELECT n.taxnode_id,
+                   n.is_hidden,
+                   l.name
+              INTO v_child_taxnode_id,
+                   v_child_is_hidden,
+                   v_child_rank
+              FROM taxonomy_node AS n
+              JOIN taxonomy_level AS l  ON l.id = n.level_id
+             WHERE n.parent_id   = p_taxnode_id
+               AND n.taxnode_id <> p_taxnode_id
+               AND n.left_idx   IS NULL
+             ORDER BY n.level_id,
+                      CASE
+                           WHEN n.start_num_sort IS NULL
+                                  THEN IFNULL(n.name,'ZZZZ')
+                           ELSE LEFT(n.name, n.start_num_sort)
+                      END,
+                      CASE
+                           WHEN n.start_num_sort IS NULL
+                                  THEN NULL
+                           ELSE CAST(
+                                    TRIM(LEADING ' '
+                                        FROM SUBSTRING(n.name, n.start_num_sort + 1)
+                           ) AS UNSIGNED)
+                      END
+             LIMIT 1;
+        END;
 
         /* ---------- no more children? then leave the loop ------------ */
         IF v_child_taxnode_id IS NULL THEN
@@ -254,6 +302,24 @@ BEGIN
         SET k_subgenus_desc_ct   = 0;
         SET k_species_desc_ct    = 0;
 
+        SET c_realm_id = p_realm_id;
+        SET c_subrealm_id = p_subrealm_id;
+        SET c_kingdom_id = p_kingdom_id;
+        SET c_subkingdom_id = p_subkingdom_id;
+        SET c_phylum_id = p_phylum_id;
+        SET c_subphylum_id = p_subphylum_id;
+        SET c_class_id = p_class_id;
+        SET c_subclass_id = p_subclass_id;
+        SET c_order_id = p_order_id;
+        SET c_suborder_id = p_suborder_id;
+        SET c_family_id = p_family_id;
+        SET c_subfamily_id = p_subfamily_id;
+        SET c_genus_id = p_genus_id;
+        SET c_subgenus_id = p_subgenus_id;
+        SET c_species_id = p_species_id;
+        SET c_inher_molecule_id = p_inher_molecule_id;
+        SET c_lineage = p_lineage;
+
         CALL taxonomy_node_compute_indexes
         (
             v_child_taxnode_id,
@@ -262,10 +328,10 @@ BEGIN
             v_child_depth,
 
             /* ancestor IDs */
-            p_realm_id, p_subrealm_id, p_kingdom_id, p_subkingdom_id,
-            p_phylum_id, p_subphylum_id, p_class_id, p_subclass_id,
-            p_order_id, p_suborder_id, p_family_id, p_subfamily_id,
-            p_genus_id, p_subgenus_id, p_species_id,
+            c_realm_id, c_subrealm_id, c_kingdom_id, c_subkingdom_id,
+            c_phylum_id, c_subphylum_id, c_class_id, c_subclass_id,
+            c_order_id, c_suborder_id, c_family_id, c_subfamily_id,
+            c_genus_id, c_subgenus_id, c_species_id,
 
             /* descendant counts OUT */
             k_realm_desc_ct,      k_subrealm_desc_ct,   k_kingdom_desc_ct,
@@ -275,8 +341,8 @@ BEGIN
             k_genus_desc_ct,      k_subgenus_desc_ct,   k_species_desc_ct,
 
             /* molecule & lineage */
-            p_inher_molecule_id,
-            p_lineage
+            c_inher_molecule_id,
+            c_lineage
         );
             
 
@@ -382,5 +448,14 @@ BEGIN
                               p_genus_desc_ct,      p_subgenus_desc_ct,
                               p_species_desc_ct )
     WHERE taxnode_id = p_taxnode_id;
+
+    IF v_is_root_reindex_call = 1 THEN
+        UPDATE taxonomy_toc
+           SET needs_reindex = 0
+         WHERE tree_id = p_taxnode_id
+           AND needs_reindex = 1;
+
+        SET @skip_taxonomy_node_reindex_flag = v_prev_skip_taxonomy_node_reindex_flag;
+    END IF;
 END$$
 DELIMITER ;
