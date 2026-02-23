@@ -26,7 +26,13 @@ BEGIN
     DECLARE CONTINUE HANDLER FOR NOT FOUND SET done = 1;
 
     -- Normalize the filter once
-    SET v_filter := IF(module_filter IS NULL OR module_filter = '', 'ERROR%', module_filter);
+    -- NULL means pass NULL through to modules (use each module's default behavior)
+    -- Empty string means "ERROR%" (legacy behavior)
+    SET v_filter := IF(
+        module_filter IS NULL,
+        NULL,
+        IF(module_filter = '', 'ERROR%', module_filter)
+    );
 
     OPEN qc_module_cursor;
 
@@ -38,10 +44,18 @@ BEGIN
 
         -- Special-case the proc that needs 2 params (filter, target_name)
         IF sp_name = 'QC_module_taxonomy_node_ictv_resurrection' THEN
-            SET sql_statement := CONCAT('CALL `', sp_name, '`(', QUOTE(v_filter), ', NULL)');
+            IF v_filter IS NULL THEN
+                SET sql_statement := CONCAT('CALL `', sp_name, '`(NULL, NULL)');
+            ELSE
+                SET sql_statement := CONCAT('CALL `', sp_name, '`(', QUOTE(v_filter), ', NULL)');
+            END IF;
         ELSE
             -- Everyone else: single-parameter signature (filter)
-            SET sql_statement := CONCAT('CALL `', sp_name, '`(', QUOTE(v_filter), ')');
+            IF v_filter IS NULL THEN
+                SET sql_statement := CONCAT('CALL `', sp_name, '`(NULL)');
+            ELSE
+                SET sql_statement := CONCAT('CALL `', sp_name, '`(', QUOTE(v_filter), ')');
+            END IF;
         END IF;
 
         -- Optional: show what we’re about to run

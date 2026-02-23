@@ -20,7 +20,7 @@ BEGIN
       CONCAT_WS(
         '',
         CASE
-          WHEN pairs_core.p_name COLLATE utf8mb4_bin = pairs_core.n_name COLLATE utf8mb4_bin
+          WHEN pairs_core.p_name COLLATE utf8mb4_uca1400_as_cs = pairs_core.n_name COLLATE utf8mb4_uca1400_as_cs
             THEN ''
           ELSE 'WARNING: CASE; '
         END,
@@ -66,14 +66,7 @@ BEGIN
           END                       AS s2,
 
           -- a little context from deltas at the start of the next span (fixed to 1 column)
-          (
-            SELECT CONCAT(
-                     COUNT(*), ':',
-                     IFNULL(MAX(CONCAT(d.tag_csv2, IFNULL(CONCAT(':', d.proposal), ''))), '')
-                   )
-            FROM taxonomy_node_delta d
-            WHERE d.new_taxid = next_range.min_taxnode_id
-          ) AS prevDELTAs,
+          nd.prevDELTAs,
 
           -- next (n_*) range + row at start of next span
           next_range.ictv_id        AS n_ictv_id,
@@ -138,6 +131,18 @@ BEGIN
 
       LEFT JOIN taxonomy_node AS nc
         ON nc.taxnode_id = next_range.min_taxnode_id
+
+      LEFT JOIN (
+          SELECT
+              d.new_taxid,
+              CONCAT(
+                COUNT(*), ':',
+                IFNULL(MAX(CONCAT(d.tag_csv2, IFNULL(CONCAT(':', d.proposal), ''))), '')
+              ) AS prevDELTAs
+          FROM taxonomy_node_delta d
+          GROUP BY d.new_taxid
+      ) AS nd
+        ON nd.new_taxid = next_range.min_taxnode_id
 
       -- only keep cases with a true gap between spans
       WHERE prev_range.max_msl < next_range.min_msl
