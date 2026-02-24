@@ -273,7 +273,7 @@ main:BEGIN
          AND species.parent_id = targetTaxNodeID
       )
    )
-   ORDER BY species.left_idx, si.isolate_sort;
+   ORDER BY si.species_sort, si.isolate_sort;
 
 END//
 
