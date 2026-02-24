@@ -22,7 +22,8 @@ CREATE INDEX abbrev ON taxonomy_molecule (abbrev);
 CREATE INDEX name ON taxonomy_genome_coverage (name);
 
 -- taxonomy_node_merge_split
-CREATE INDEX taxonomy_node_merge_split_next_ictv_id_IDX ON taxonomy_node_merge_split (next_ictv_id);
+-- Commenting out for now as there is a FK for the same column, making this a duplicate
+-- CREATE INDEX taxonomy_node_merge_split_next_ictv_id_IDX ON taxonomy_node_merge_split (next_ictv_id);
 CREATE INDEX taxonomy_node_merge_split_prev_ictv_id_IDX ON taxonomy_node_merge_split (prev_ictv_id);
 
 -- taxonomy_node_delta

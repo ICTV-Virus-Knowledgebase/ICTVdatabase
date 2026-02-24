@@ -12,5 +12,4 @@ DROP TABLE IF EXISTS `taxonomy_node`;
 DROP TABLE IF EXISTS `taxonomy_node_delta`;
 DROP TABLE IF EXISTS `taxonomy_node_merge_split`;
 DROP TABLE IF EXISTS `taxonomy_toc`;
-DROP TABLE IF EXISTS `virus_prop`;
 SET foreign_key_checks = 1;
