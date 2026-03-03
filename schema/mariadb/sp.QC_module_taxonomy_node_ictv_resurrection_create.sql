@@ -78,12 +78,7 @@ BEGIN
           nc.in_change              AS n_in_change,
 
           -- link count between prev and next ictv_id (central to QC)
-          (
-            SELECT COUNT(*)
-            FROM taxonomy_node_merge_split ms
-            WHERE ms.prev_ictv_id = prev_range.ictv_id
-              AND ms.next_ictv_id = next_range.ictv_id
-          ) AS link_ct
+          IFNULL(ms_link.link_ct, 0) AS link_ct
 
       FROM (
           -- names (by level) that appear with >1 distinct ictv_id
@@ -143,6 +138,19 @@ BEGIN
           GROUP BY d.new_taxid
       ) AS nd
         ON nd.new_taxid = next_range.min_taxnode_id
+
+      LEFT JOIN (
+          SELECT
+              ms.prev_ictv_id,
+              ms.next_ictv_id,
+              COUNT(*) AS link_ct
+          FROM taxonomy_node_merge_split AS ms
+          GROUP BY
+              ms.prev_ictv_id,
+              ms.next_ictv_id
+      ) AS ms_link
+        ON ms_link.prev_ictv_id = prev_range.ictv_id
+       AND ms_link.next_ictv_id = next_range.ictv_id
 
       -- only keep cases with a true gap between spans
       WHERE prev_range.max_msl < next_range.min_msl
