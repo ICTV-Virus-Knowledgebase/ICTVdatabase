@@ -28,8 +28,9 @@ taxonomy_change_out="taxonomy_change_out"
 taxonomy_node_delta="taxonomy_node_delta"
 taxonomy_node_merge_split="taxonomy_node_merge_split"
 
-# View
+# Views
 vmr_export="vmr_export"
+taxonomy_node_export="taxonomy_node_export"
 
 #-----------------------------------------#
 # Export table data to tsv formatted file
@@ -105,6 +106,9 @@ mariadb -D "$DATABASE" --default-character-set=utf8mb4 --batch --raw -e "SELECT 
 
 # vmr_export
 mariadb -D "$DATABASE" --default-character-set=utf8mb4 --batch --raw -e "SELECT * FROM "$vmr_export"" > "$DATA_DIR/vmr_export.utf8.txt"
+
+# taxonomy_node_export view
+mariadb -D "$DATABASE" --default-character-set=utf8mb4 --batch --raw -e "SELECT * FROM "$taxonomy_node_export"" > "$DATA_DIR/taxonomy_node_export.utf8.txt"
 
 # taxonomy_node
 mariadb -D "$DATABASE" --default-character-set=utf8mb4 --batch --raw \
