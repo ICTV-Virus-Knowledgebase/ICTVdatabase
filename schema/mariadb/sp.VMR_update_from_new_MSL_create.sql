@@ -106,7 +106,7 @@ BEGIN
         update_prev_taxnode_id,
         update_prev_species
     )
-    SELECT
+SELECT
         dx.name AS species_name,
         'E' AS isolate_type,
         dx.exemplar_name AS isolate_names,
@@ -127,14 +127,18 @@ BEGIN
     LEFT JOIN taxonomy_molecule mol
       ON mol.id = dx.inher_molecule_id
     WHERE dx.msl_release_num = (SELECT MAX(msl_release_num) FROM taxonomy_toc)
+      and dx.genbank_accession_csv is not null
+      and dx.in_change in ('new', 'split')
       AND dx.level_id = 600
       AND dx.is_hidden = 0
       AND NOT EXISTS (
           SELECT 1
           FROM species_isolates s
-          WHERE s.taxnode_id = dx.taxnode_id
+          -- WHERE s.taxnode_id = dx.taxnode_id
+          where s.genbank_accessions  = dx.genbank_accession_csv 
+          and s.species_name = dx.name 
             AND s.isolate_type = 'E'
-      );
+   );
 
     /* -------------------------------------------------------------
        Enforce one exemplar row per non-abolished species.
