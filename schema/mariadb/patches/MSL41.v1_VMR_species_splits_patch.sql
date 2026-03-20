@@ -191,3 +191,134 @@ or si.species_name like '%zilberi%';
 commit;
 
 -- ----------------------------------------------------------
+
+call species_isolates_update_sorts();
+
+call QC_run_modules(NULL);
+
+-- ----------------------------------------------------------
+-- Update taxonomy_node.notes, taxonomy_node.name
+-- ----------------------------------------------------------
+
+-- This was done first
+update taxonomy_node tn 
+set notes = 'EC 57, Birmingham, Alabama, USA, August 2025; Email ratification February 2026; (MSL #41); release v1, March 20, 2026',
+name = '2025'
+where notes = 'Provisional EC ##, Online meeting, July YYYY; Email ratification March YYYY (MSL ###)'
+and name = 'yyyy';
+
+-- Decided we wanted it formatted differently
+update taxonomy_node tn 
+set notes = 'EC 57, Birmingham, Alabama, USA, August 2025; Email ratification February 2026 (MSL #41) release v1, March 20, 2026',
+name = '2025'
+where notes = 'EC 57, Birmingham, Alabama, USA, August 2025; Email ratification February 2026; (MSL #41); release v1, March 20, 2026'
+and name = '2025';
+
+-- Decided to make 2024 and 2023 consistent with 2025
+
+-- 2024
+update taxonomy_node tn 
+set notes = 'EC 56, Bari, Italy, August 2024; Email ratification February 2025 (MSL #40) release v2, August 22, 2025'
+where notes = 'EC 56, Bari, Italy, August 2024; Email ratification February 2025 (MSL #40); release v2, August 22, 2025'
+and name = '2024';
+
+-- 2023
+update taxonomy_node tn 
+set notes = 'EC 55, Jena, Germany, August 2023; Email ratification April 2024 (MSL #39) release v4, October 30, 2024'
+where notes = 'EC 55, Jena, Germany, August 2023; Email ratification April 2024 (MSL #39); release v4, October 30, 2024'
+and name = '2023';
+
+-- ----------------------------------------------------------
+-- Update taxonomy_toc.version_tag
+-- ----------------------------------------------------------
+
+update taxonomy_toc 
+set version_tag = 'MSL41.v1'
+where tree_id = 202500000
+and msl_release_num = 41;
+
+-- ------------------------------------------------------------
+-- Clear needs_reindex flag in taxonomy_toc
+-- Needed after updating rows inside taxonomy_node
+-- !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+-- It would be good to make the trigger not flag needs_reindex
+-- when a root node or hidden node is updated
+-- !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+-- ------------------------------------------------------------
+
+SET @tree_id := 202500000;
+SET @right_idx := NULL;
+
+SET @realm_id := NULL;
+SET @subrealm_id := NULL;
+SET @kingdom_id := NULL;
+SET @subkingdom_id := NULL;
+SET @phylum_id := NULL;
+SET @subphylum_id := NULL;
+SET @class_id := NULL;
+SET @subclass_id := NULL;
+SET @order_id := NULL;
+SET @suborder_id := NULL;
+SET @family_id := NULL;
+SET @subfamily_id := NULL;
+SET @genus_id := NULL;
+SET @subgenus_id := NULL;
+SET @species_id := NULL;
+
+SET @realm_desc_ct := 0;
+SET @subrealm_desc_ct := 0;
+SET @kingdom_desc_ct := 0;
+SET @subkingdom_desc_ct := 0;
+SET @phylum_desc_ct := 0;
+SET @subphylum_desc_ct := 0;
+SET @class_desc_ct := 0;
+SET @subclass_desc_ct := 0;
+SET @order_desc_ct := 0;
+SET @suborder_desc_ct := 0;
+SET @family_desc_ct := 0;
+SET @subfamily_desc_ct := 0;
+SET @genus_desc_ct := 0;
+SET @subgenus_desc_ct := 0;
+SET @species_desc_ct := 0;
+
+SET @inher_molecule_id := NULL;
+SET @lineage := NULL;
+
+CALL taxonomy_node_compute_indexes(
+    @tree_id,
+    1,
+    @right_idx,
+    1,
+    @realm_id,
+    @subrealm_id,
+    @kingdom_id,
+    @subkingdom_id,
+    @phylum_id,
+    @subphylum_id,
+    @class_id,
+    @subclass_id,
+    @order_id,
+    @suborder_id,
+    @family_id,
+    @subfamily_id,
+    @genus_id,
+    @subgenus_id,
+    @species_id,
+    @realm_desc_ct,
+    @subrealm_desc_ct,
+    @kingdom_desc_ct,
+    @subkingdom_desc_ct,
+    @phylum_desc_ct,
+    @subphylum_desc_ct,
+    @class_desc_ct,
+    @subclass_desc_ct,
+    @order_desc_ct,
+    @suborder_desc_ct,
+    @family_desc_ct,
+    @subfamily_desc_ct,
+    @genus_desc_ct,
+    @subgenus_desc_ct,
+    @species_desc_ct,
+    @inher_molecule_id,
+    @lineage
+);
