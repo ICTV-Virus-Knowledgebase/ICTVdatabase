@@ -176,7 +176,6 @@ mariadb -D "$DBNAME" -vvv --show-warnings < "$SCHEMA_DIR/sp.rebuild_delta_nodes_
 mariadb -D "$DBNAME" -vvv --show-warnings < "$SCHEMA_DIR/sp.searchTaxonomy_create.sql"
 mariadb -D "$DBNAME" -vvv --show-warnings < "$SCHEMA_DIR/sp.simplify_molecule_id_settings_create.sql"
 mariadb -D "$DBNAME" -vvv --show-warnings < "$SCHEMA_DIR/sp.species_isolates_update_sorts_create.sql"
-mariadb -D "$DBNAME" -vvv --show-warnings < "$SCHEMA_DIR/sp.NCBI_linkout_ft_export_create.sql"
 mariadb -D "$DBNAME" -vvv --show-warnings < "$SCHEMA_DIR/sp.taxonomy_node_compute_indexes_create.sql"
 mariadb -D "$DBNAME" -vvv --show-warnings < "$SCHEMA_DIR/sp.rebuild_node_merge_split_create.sql"
 mariadb -D "$DBNAME" -vvv --show-warnings < "$SCHEMA_DIR/sp.VMR_update_from_new_MSL_create.sql"
