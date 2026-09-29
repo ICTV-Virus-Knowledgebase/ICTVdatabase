@@ -1125,3 +1125,439 @@ Rollback backup tables:
   species_isolates_bak_20260721_194959
 Total execution time: 0 minutes and 4 seconds
 Dropping staging database vmr_stage_20260721_194959_270028
+
+=== VMR update run 20260721_201609 UTC ===
+Using SCRIPT_DIR=/home/ubuntu/logan/git-repos/ICTVdatabase/schema/mariadb/load
+Using DATA_DIR=/home/ubuntu/logan/git-repos/ICTVdatabase/data
+Using SCHEMA_DIR=/home/ubuntu/logan/git-repos/ICTVdatabase/schema/mariadb
+Target database: ictv_taxonomy_temp
+Update scope: species
+Dry run: 0
+Running preflight checks
+  species_isolates: current=19452, input=19467
+Creating staging database vmr_stage_20260721_201609_538259
+Creating staging table species_isolates
+--------------
+CREATE TABLE `species_isolates` (
+  `isolate_id` INT AUTO_INCREMENT NOT NULL,
+  `taxnode_id` INT,
+  `species_sort` INT,
+  `isolate_sort` INT NOT NULL DEFAULT 1,
+  `species_name` VARCHAR(100) NOT NULL,
+  `isolate_type` CHAR(1) NOT NULL,
+  `isolate_names` VARCHAR(500),
+  `_isolate_name` VARCHAR(500) GENERATED ALWAYS AS (
+    CASE 
+      WHEN `isolate_names` LIKE '%;%' 
+      THEN LEFT(`isolate_names`, LOCATE(';', `isolate_names`) - 1) 
+      ELSE `isolate_names` 
+    END
+  ) PERSISTENT,
+  `isolate_abbrevs` VARCHAR(255),
+  `isolate_designation` VARCHAR(500),
+  `genbank_accessions` VARCHAR(4000),
+  `refseq_accessions` VARCHAR(4000),
+  `genome_coverage` VARCHAR(50),
+  `molecule` VARCHAR(50),
+  `host_source` VARCHAR(50),
+  `refseq_organism` VARCHAR(255),
+  `refseq_taxids` VARCHAR(4000),
+  `update_change` VARCHAR(50),
+  `update_prev_species` VARCHAR(100),
+  `update_prev_taxnode_id` INT,
+  `update_change_proposal` VARCHAR(512),
+  `notes` TEXT,
+  PRIMARY KEY (`isolate_id`)
+) ENGINE=InnoDB DEFAULT CHARSET = utf8mb4
+  COLLATE = utf8mb4_general_ci
+--------------
+
+Query OK, 0 rows affected (0.011 sec)
+
+Bye
+Loading staging table species_isolates
+--------------
+LOAD DATA LOCAL INFILE '../../../data/species_isolates.utf8.txt'
+INTO TABLE species_isolates
+CHARACTER SET utf8mb4
+FIELDS TERMINATED BY '\t'
+OPTIONALLY ENCLOSED BY '"'
+ESCAPED BY '\\'
+LINES TERMINATED BY '\n'
+IGNORE 1 ROWS
+(
+  isolate_id,
+  taxnode_id,
+  species_sort,
+  isolate_sort,
+  species_name,
+  isolate_type,
+  isolate_names,
+  isolate_abbrevs,
+  isolate_designation,
+  genbank_accessions,
+  refseq_accessions,
+  genome_coverage,
+  molecule,
+  host_source,
+  refseq_organism,
+  refseq_taxids,
+  update_change,
+  update_prev_species,
+  update_prev_taxnode_id,
+  update_change_proposal,
+  
+  notes
+)
+--------------
+
+Query OK, 19467 rows affected (0.218 sec)
+Records: 19467  Deleted: 0  Skipped: 0  Warnings: 0
+
+--------------
+SET @autoIncVal := (
+  SELECT COALESCE(MAX(isolate_id), 0) + 1
+  FROM species_isolates
+)
+--------------
+
+Query OK, 0 rows affected (0.000 sec)
+
+--------------
+SET @sql = CONCAT('ALTER TABLE species_isolates AUTO_INCREMENT = ', @autoIncVal)
+--------------
+
+Query OK, 0 rows affected (0.000 sec)
+
+--------------
+PREPARE st FROM @sql
+--------------
+
+Query OK, 0 rows affected (0.000 sec)
+Statement prepared
+
+--------------
+EXECUTE st
+--------------
+
+Query OK, 0 rows affected (0.008 sec)
+Records: 0  Duplicates: 0  Warnings: 0
+
+--------------
+DEALLOCATE PREPARE st
+--------------
+
+Query OK, 0 rows affected (0.000 sec)
+
+Bye
+Validated row count for species_isolates: 19467
+Validating staging data
+Validated: species taxnode_id values exist
+Validated: species update_prev_taxnode_id values exist
+Validated: species genome_coverage values exist
+Validated: species host_source values exist
+Validated: species molecule values exist
+Creating rollback backup tables
+--------------
+CREATE TABLE `species_isolates_bak_20260721_201609` LIKE `species_isolates`
+--------------
+
+Query OK, 0 rows affected (0.010 sec)
+
+Bye
+Publishing validated VMR data
+--------------
+SET SESSION foreign_key_checks = 1
+--------------
+
+Query OK, 0 rows affected (0.000 sec)
+
+--------------
+START TRANSACTION
+--------------
+
+Query OK, 0 rows affected (0.000 sec)
+
+--------------
+INSERT INTO `species_isolates_bak_20260721_201609` (
+  isolate_id, taxnode_id, species_sort, isolate_sort, species_name,
+  isolate_type, isolate_names, isolate_abbrevs, isolate_designation,
+  genbank_accessions, refseq_accessions, genome_coverage, molecule,
+  host_source, refseq_organism, refseq_taxids, update_change,
+  update_prev_species, update_prev_taxnode_id, update_change_proposal, notes
+)
+SELECT
+  isolate_id, taxnode_id, species_sort, isolate_sort, species_name,
+  isolate_type, isolate_names, isolate_abbrevs, isolate_designation,
+  genbank_accessions, refseq_accessions, genome_coverage, molecule,
+  host_source, refseq_organism, refseq_taxids, update_change,
+  update_prev_species, update_prev_taxnode_id, update_change_proposal, notes
+FROM species_isolates
+--------------
+
+Query OK, 19452 rows affected (0.448 sec)
+Records: 19452  Duplicates: 0  Warnings: 0
+
+--------------
+DELETE FROM species_isolates
+--------------
+
+Query OK, 19452 rows affected (0.200 sec)
+
+--------------
+INSERT INTO species_isolates (
+  isolate_id, taxnode_id, species_sort, isolate_sort, species_name,
+  isolate_type, isolate_names, isolate_abbrevs, isolate_designation,
+  genbank_accessions, refseq_accessions, genome_coverage, molecule,
+  host_source, refseq_organism, refseq_taxids, update_change,
+  update_prev_species, update_prev_taxnode_id, update_change_proposal, notes
+)
+SELECT
+  isolate_id, taxnode_id, species_sort, isolate_sort, species_name,
+  isolate_type, isolate_names, isolate_abbrevs, isolate_designation,
+  genbank_accessions, refseq_accessions, genome_coverage, molecule,
+  host_source, refseq_organism, refseq_taxids, update_change,
+  update_prev_species, update_prev_taxnode_id, update_change_proposal, notes
+FROM `vmr_stage_20260721_201609_538259`.species_isolates
+--------------
+
+Query OK, 19467 rows affected (0.903 sec)
+Records: 19467  Duplicates: 0  Warnings: 0
+
+--------------
+COMMIT
+--------------
+
+Query OK, 0 rows affected (0.003 sec)
+
+Bye
+Running post-publication validation
+  species_isolates: published=19467, backup=19452
+Validated: species taxnode_id values exist
+Validated: species update_prev_taxnode_id values exist
+Validated: species genome_coverage values exist
+Validated: species host_source values exist
+Validated: species molecule values exist
+VMR update completed successfully.
+Rollback backup tables:
+  species_isolates_bak_20260721_201609
+Total execution time: 0 minutes and 2 seconds
+Dropping staging database vmr_stage_20260721_201609_538259
+
+=== VMR update run 20260721_201733 UTC ===
+Using SCRIPT_DIR=/home/ubuntu/logan/git-repos/ICTVdatabase/schema/mariadb/load
+Using DATA_DIR=/home/ubuntu/logan/git-repos/ICTVdatabase/data
+Using SCHEMA_DIR=/home/ubuntu/logan/git-repos/ICTVdatabase/schema/mariadb
+Target database: ictv_taxonomy
+Update scope: species
+Dry run: 0
+Running preflight checks
+  species_isolates: current=19452, input=19467
+Creating staging database vmr_stage_20260721_201733_538413
+Creating staging table species_isolates
+--------------
+CREATE TABLE `species_isolates` (
+  `isolate_id` INT AUTO_INCREMENT NOT NULL,
+  `taxnode_id` INT,
+  `species_sort` INT,
+  `isolate_sort` INT NOT NULL DEFAULT 1,
+  `species_name` VARCHAR(100) NOT NULL,
+  `isolate_type` CHAR(1) NOT NULL,
+  `isolate_names` VARCHAR(500),
+  `_isolate_name` VARCHAR(500) GENERATED ALWAYS AS (
+    CASE 
+      WHEN `isolate_names` LIKE '%;%' 
+      THEN LEFT(`isolate_names`, LOCATE(';', `isolate_names`) - 1) 
+      ELSE `isolate_names` 
+    END
+  ) PERSISTENT,
+  `isolate_abbrevs` VARCHAR(255),
+  `isolate_designation` VARCHAR(500),
+  `genbank_accessions` VARCHAR(4000),
+  `refseq_accessions` VARCHAR(4000),
+  `genome_coverage` VARCHAR(50),
+  `molecule` VARCHAR(50),
+  `host_source` VARCHAR(50),
+  `refseq_organism` VARCHAR(255),
+  `refseq_taxids` VARCHAR(4000),
+  `update_change` VARCHAR(50),
+  `update_prev_species` VARCHAR(100),
+  `update_prev_taxnode_id` INT,
+  `update_change_proposal` VARCHAR(512),
+  `notes` TEXT,
+  PRIMARY KEY (`isolate_id`)
+) ENGINE=InnoDB DEFAULT CHARSET = utf8mb4
+  COLLATE = utf8mb4_general_ci
+--------------
+
+Query OK, 0 rows affected (0.005 sec)
+
+Bye
+Loading staging table species_isolates
+--------------
+LOAD DATA LOCAL INFILE '../../../data/species_isolates.utf8.txt'
+INTO TABLE species_isolates
+CHARACTER SET utf8mb4
+FIELDS TERMINATED BY '\t'
+OPTIONALLY ENCLOSED BY '"'
+ESCAPED BY '\\'
+LINES TERMINATED BY '\n'
+IGNORE 1 ROWS
+(
+  isolate_id,
+  taxnode_id,
+  species_sort,
+  isolate_sort,
+  species_name,
+  isolate_type,
+  isolate_names,
+  isolate_abbrevs,
+  isolate_designation,
+  genbank_accessions,
+  refseq_accessions,
+  genome_coverage,
+  molecule,
+  host_source,
+  refseq_organism,
+  refseq_taxids,
+  update_change,
+  update_prev_species,
+  update_prev_taxnode_id,
+  update_change_proposal,
+  
+  notes
+)
+--------------
+
+Query OK, 19467 rows affected (0.219 sec)
+Records: 19467  Deleted: 0  Skipped: 0  Warnings: 0
+
+--------------
+SET @autoIncVal := (
+  SELECT COALESCE(MAX(isolate_id), 0) + 1
+  FROM species_isolates
+)
+--------------
+
+Query OK, 0 rows affected (0.000 sec)
+
+--------------
+SET @sql = CONCAT('ALTER TABLE species_isolates AUTO_INCREMENT = ', @autoIncVal)
+--------------
+
+Query OK, 0 rows affected (0.000 sec)
+
+--------------
+PREPARE st FROM @sql
+--------------
+
+Query OK, 0 rows affected (0.000 sec)
+Statement prepared
+
+--------------
+EXECUTE st
+--------------
+
+Query OK, 0 rows affected (0.006 sec)
+Records: 0  Duplicates: 0  Warnings: 0
+
+--------------
+DEALLOCATE PREPARE st
+--------------
+
+Query OK, 0 rows affected (0.000 sec)
+
+Bye
+Validated row count for species_isolates: 19467
+Validating staging data
+Validated: species taxnode_id values exist
+Validated: species update_prev_taxnode_id values exist
+Validated: species genome_coverage values exist
+Validated: species host_source values exist
+Validated: species molecule values exist
+Creating rollback backup tables
+--------------
+CREATE TABLE `species_isolates_bak_20260721_201733` LIKE `species_isolates`
+--------------
+
+Query OK, 0 rows affected (0.010 sec)
+
+Bye
+Publishing validated VMR data
+--------------
+SET SESSION foreign_key_checks = 1
+--------------
+
+Query OK, 0 rows affected (0.000 sec)
+
+--------------
+START TRANSACTION
+--------------
+
+Query OK, 0 rows affected (0.000 sec)
+
+--------------
+INSERT INTO `species_isolates_bak_20260721_201733` (
+  isolate_id, taxnode_id, species_sort, isolate_sort, species_name,
+  isolate_type, isolate_names, isolate_abbrevs, isolate_designation,
+  genbank_accessions, refseq_accessions, genome_coverage, molecule,
+  host_source, refseq_organism, refseq_taxids, update_change,
+  update_prev_species, update_prev_taxnode_id, update_change_proposal, notes
+)
+SELECT
+  isolate_id, taxnode_id, species_sort, isolate_sort, species_name,
+  isolate_type, isolate_names, isolate_abbrevs, isolate_designation,
+  genbank_accessions, refseq_accessions, genome_coverage, molecule,
+  host_source, refseq_organism, refseq_taxids, update_change,
+  update_prev_species, update_prev_taxnode_id, update_change_proposal, notes
+FROM species_isolates
+--------------
+
+Query OK, 19452 rows affected (0.346 sec)
+Records: 19452  Duplicates: 0  Warnings: 0
+
+--------------
+DELETE FROM species_isolates
+--------------
+
+Query OK, 19452 rows affected (0.241 sec)
+
+--------------
+INSERT INTO species_isolates (
+  isolate_id, taxnode_id, species_sort, isolate_sort, species_name,
+  isolate_type, isolate_names, isolate_abbrevs, isolate_designation,
+  genbank_accessions, refseq_accessions, genome_coverage, molecule,
+  host_source, refseq_organism, refseq_taxids, update_change,
+  update_prev_species, update_prev_taxnode_id, update_change_proposal, notes
+)
+SELECT
+  isolate_id, taxnode_id, species_sort, isolate_sort, species_name,
+  isolate_type, isolate_names, isolate_abbrevs, isolate_designation,
+  genbank_accessions, refseq_accessions, genome_coverage, molecule,
+  host_source, refseq_organism, refseq_taxids, update_change,
+  update_prev_species, update_prev_taxnode_id, update_change_proposal, notes
+FROM `vmr_stage_20260721_201733_538413`.species_isolates
+--------------
+
+Query OK, 19467 rows affected (0.356 sec)
+Records: 19467  Duplicates: 0  Warnings: 0
+
+--------------
+COMMIT
+--------------
+
+Query OK, 0 rows affected (0.002 sec)
+
+Bye
+Running post-publication validation
+  species_isolates: published=19467, backup=19452
+Validated: species taxnode_id values exist
+Validated: species update_prev_taxnode_id values exist
+Validated: species genome_coverage values exist
+Validated: species host_source values exist
+Validated: species molecule values exist
+VMR update completed successfully.
+Rollback backup tables:
+  species_isolates_bak_20260721_201733
+Total execution time: 0 minutes and 2 seconds
+Dropping staging database vmr_stage_20260721_201733_538413
