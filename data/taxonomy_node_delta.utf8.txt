@@ -46557,8 +46557,6 @@ prev_taxid	new_taxid	proposal	notes	is_merged	is_split	is_moved	is_promoted	is_d
 \N	20125725	"2012.001aI.A.v2.Alphabaculovirus-8sp.pdf"	"2012.001aI: create 8 species (Agrotis segetum nucleopolyhedrovirus, Antheraea pernyi nucleopolyhedrovirus, Chrysodeixis chalcites nucleopolyhedrovirus, Clanis bilineata nucleopolyhedrovirus, Euproctis pseudoconspersa nucleopolyhedrovirus, Hyphantria cunea nucleopolyhedrovirus, Leucania separata nucleopolyhedrovirus, and Maruca vitrata nucleopolyhedrovirus) in the genus Alphabaculovirus, family Baculoviridae"	0	0	0	0	0	0	1	0	0	0	27
 \N	20125726	"2012.001aI.A.v2.Alphabaculovirus-8sp.pdf"	"2012.001aI: create 8 species (Agrotis segetum nucleopolyhedrovirus, Antheraea pernyi nucleopolyhedrovirus, Chrysodeixis chalcites nucleopolyhedrovirus, Clanis bilineata nucleopolyhedrovirus, Euproctis pseudoconspersa nucleopolyhedrovirus, Hyphantria cunea nucleopolyhedrovirus, Leucania separata nucleopolyhedrovirus, and Maruca vitrata nucleopolyhedrovirus) in the genus Alphabaculovirus, family Baculoviridae"	0	0	0	0	0	0	1	0	0	0	27
 \N	20125727	"2011.005a-eP.A.v2.Zeavirus.pdf"	"2011.005aP: create a new genus in the family Tombusviridae; 2011.005bP: name the genus Zeavirus"	0	0	0	0	0	0	1	0	0	0	27
-\N	20125728	"2011.009a-mP.A.v3.split_Necrovirus.pdf"	"2011.009aP: create a new genus in the family Tombusviridae; 2011.009bP: name the genus Alphanecrovirus"	0	0	0	0	0	0	1	0	0	0	27
-\N	20125729	"2011.009a-mP.A.v3.split_Necrovirus.pdf"	"2011.009dP: create a new genus in the proposed family Tombusviridae; 2011.009eP: name the genus Betanecrovirus"	0	0	0	0	0	0	1	0	0	0	27
 \N	20125730	"2011.010a-eP.A.v3.Gallantivirus.pdf"	"2011.010aP: create a new genus in the family Tombusviridae; 2011.010bP: name the new genus Gallantivirus"	0	0	0	0	0	0	1	0	0	0	27
 \N	20125731	"2011.010f-iP.A.v3.Macanavirus.pdf"	"2011.010gP: create a new genus in the family Tombusviridae; 2011.010hP: name the new genus Macanavirus"	0	0	0	0	0	0	1	0	0	0	27
 \N	20125732	"2011.010f-iP.A.v3.Macanavirus.pdf"	"2011.010fP: create species named Furcraea necrotic streak virus in the proposed genus Macanavirus in the family Tombusviridae; 2011.010iP: designate Furcraea necrotic streak virus as type species in the new genus"	0	0	0	0	0	0	1	0	0	0	27
@@ -47139,7 +47137,8 @@ prev_taxid	new_taxid	proposal	notes	is_merged	is_split	is_moved	is_promoted	is_d
 20111338	20121338	\N	\N	0	0	0	0	0	0	0	0	0	0	27
 20111339	20121339	\N	\N	0	0	0	0	0	0	0	0	0	0	27
 20111340	20121340	\N	\N	0	0	0	0	0	0	0	0	0	0	27
-20111341	\N	"2011.009a-mP.A.v3.split_Necrovirus.pdf"	\N	0	0	0	0	0	0	0	1	0	0	27
+20111341	20125728	"2011.009a-mP.A.v3.split_Necrovirus.pdf"	"2011.009a-mP: split Alphanecrovirus from the genus Necrovirus. Originally misrecorded in the database as new."	0	1	0	0	0	0	0	0	0	0	27
+20111341	20125729	"2011.009a-mP.A.v3.split_Necrovirus.pdf"	"2011.009a-mP : split Betanecrovirus from the genus Necrovirus. Originally misrecorded in the database as new."	0	1	0	0	0	0	0	0	0	0	27
 20111342	20121342	\N	\N	0	0	0	0	0	0	0	0	0	0	27
 20111343	20121343	\N	\N	0	0	0	0	0	0	0	0	0	0	27
 20111345	20121345	\N	\N	0	0	0	0	0	0	0	0	0	0	27
