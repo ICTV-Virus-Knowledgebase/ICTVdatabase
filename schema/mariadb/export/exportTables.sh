@@ -31,6 +31,7 @@ taxonomy_node_merge_split="taxonomy_node_merge_split"
 # Views
 vmr_export="vmr_export"
 taxonomy_node_export="taxonomy_node_export"
+known_taxa_changes="specialCaseTaxaReport"
 
 TMP_DIR="$(mktemp -d /tmp/ictv_mariadb_export.XXXXXX)"
 chmod 0777 "$TMP_DIR"
@@ -151,6 +152,15 @@ export_query "vmr_export.utf8.txt" "SELECT * FROM $vmr_export"
 
 # taxonomy_node_export view
 export_query "taxonomy_node_export.utf8.txt" "SELECT * FROM $taxonomy_node_export"
+
+# Known split, merge, demotion, promotion, and abolished taxa (workbook SQL)
+known_taxa_report="report.special_case_taxa"
+export_query "$known_taxa_report.utf8.txt" "SELECT * FROM $known_taxa_changes ORDER BY msl_release_num, prev_id, next_id"
+bash "$SCRIPT_DIR/exportXlsx.sh" \
+  "$DATA_DIR/$known_taxa_report.utf8.txt" \
+  "$DATA_DIR/$known_taxa_report.xlsx"
+# set -e preserves the TSV if environment setup or conversion fails.
+rm -- "$DATA_DIR/$known_taxa_report.utf8.txt"
 
 # taxonomy_node
 export_query "taxonomy_node_mariadb_etl.utf8.txt" "SELECT

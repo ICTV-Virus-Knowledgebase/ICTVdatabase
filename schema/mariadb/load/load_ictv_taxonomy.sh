@@ -113,6 +113,7 @@ mariadb -D "$DBNAME" -vvv --show-warnings < "$SCHEMA_DIR/view.species_historic_n
 mariadb -D "$DBNAME" -vvv --show-warnings < "$SCHEMA_DIR/view.species_isolates_alpha_num1_num2_create.sql"
 mariadb -D "$DBNAME" -vvv --show-warnings < "$SCHEMA_DIR/view.species_latest_create.sql"
 mariadb -D "$DBNAME" -vvv --show-warnings < "$SCHEMA_DIR/view.taxonomy_node_dx_create.sql"
+mariadb -D "$DBNAME" -vvv --show-warnings < "$SCHEMA_DIR/view.specialCaseTaxaReport.sql"
 mariadb -D "$DBNAME" -vvv --show-warnings < "$SCHEMA_DIR/view.taxonomy_node_export_create.sql"
 mariadb -D "$DBNAME" -vvv --show-warnings < "$SCHEMA_DIR/view.taxonomy_node_x_create.sql"
 mariadb -D "$DBNAME" -vvv --show-warnings < "$SCHEMA_DIR/view.taxonomy_toc_dx_create.sql"
