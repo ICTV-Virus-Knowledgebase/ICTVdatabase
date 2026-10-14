@@ -176577,6 +176577,7 @@ prev_taxid	new_taxid	proposal	notes	is_merged	is_split	is_moved	is_promoted	is_d
 \N	202523325	"2025.090B.Anamaviridae_1nf.zip"	"xlsx_row=25"	0	0	0	0	0	0	1	0	0	0	41
 \N	202523326	"2025.090B.Anamaviridae_1nf.zip"	"xlsx_row=26"	0	0	0	0	0	0	1	0	0	0	41
 \N	202523327	"2025.090B.Anamaviridae_1nf.zip"	"xlsx_row=28"	0	0	0	0	0	0	1	0	0	0	41
+\N	202523330	"2025.007S.Orthoflavivirus_2nsp_1spren.zip;2025.007S.Orthoflavivirus_2nsp_1spren.zip"	"linenum=7"	0	0	0	0	0	0	1	0	0	0	41
 202400000	202500000	\N	\N	0	0	0	0	0	0	0	0	0	0	41
 202400001	202500001	\N	\N	0	0	0	0	0	0	0	0	0	0	41
 202400004	202500004	\N	\N	0	0	0	0	0	0	0	0	0	0	41
@@ -179509,7 +179510,6 @@ prev_taxid	new_taxid	proposal	notes	is_merged	is_split	is_moved	is_promoted	is_d
 202403113	202503113	"2025.006S.Amarillovirales_3reorgfam.zip"	"linenum=52"	0	0	1	0	0	0	0	0	0	1	41
 202403114	202523328	"2025.007S.Orthoflavivirus_2nsp_1spren.zip;2025.007S.Orthoflavivirus_2nsp_1spren.zip"	"linenum=5"	0	1	1	0	0	0	0	0	0	0	41
 202403114	202523329	"2025.007S.Orthoflavivirus_2nsp_1spren.zip;2025.007S.Orthoflavivirus_2nsp_1spren.zip"	"linenum=6"	0	1	1	0	0	0	0	0	0	0	41
-202403114	202523330	"2025.007S.Orthoflavivirus_2nsp_1spren.zip;2025.007S.Orthoflavivirus_2nsp_1spren.zip"	"linenum=7"	0	1	1	0	0	0	0	0	0	0	41
 202403115	202503115	"2025.006S.Amarillovirales_3reorgfam.zip"	"linenum=53"	0	0	1	0	0	0	0	0	0	1	41
 202403116	202503116	"2025.006S.Amarillovirales_3reorgfam.zip"	"linenum=54"	0	0	1	0	0	0	0	0	0	1	41
 202403117	202503117	"2025.006S.Amarillovirales_3reorgfam.zip"	"linenum=55"	0	0	1	0	0	0	0	0	0	1	41
