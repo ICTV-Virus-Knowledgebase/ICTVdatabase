@@ -1,7 +1,7 @@
 /* ================================================================
    Stored procedure  : QC_module_vmr_export_species_count
    Converted from    : SQL-Server to MariaDB
-   Preserves         : All original comments and behaviour
+   Accession QC      : Normalized individual accessions, distinct isolates
    Tested on         : MariaDB 10.11
    ================================================================ */
 DELIMITER $$
@@ -26,7 +26,7 @@ BEGIN
     SELECT MAX(msl_release_num) INTO v_curr_msl FROM taxonomy_toc;
 
     /* --------------------------------------------------------------
-       Main SELECT – identical UNION branches, just MySQL/MariaDB syntax
+       Main SELECT – species, exemplar, accession and sort checks
        -------------------------------------------------------------- */
     SELECT
         'QC_module_vmr_export_species_count'  AS qc_module,    -- OBJECT_NAME(@@PROCID)
@@ -76,26 +76,33 @@ BEGIN
 
         UNION ALL
 
-        /* ---------- duplicate GenBank accession numbers ----------- */
+        /* Individual GenBank/RefSeq accessions, ignoring labels, versions
+           and repeats within one isolate. Restrict to exported isolates. */
         SELECT
               'ERROR: two isolates have same accession [vmr_export]' AS qc_mesg,
-              v_curr_msl                          AS msl_release_num,
-              CASE
-                  WHEN vmr.`Virus GENBANK accession` = ''
-                       THEN 'MSL40: no accession; N=151'
-                  ELSE CONCAT(
-                          vmr.`Virus GENBANK accession`,
-                          ' [',
-                          MIN(CONCAT(`Species`,':',`Exemplar or additional isolate`,':',`Virus name(s)`)),
-                          ' | ',
-                          MAX(CONCAT(`Species`,':',`Exemplar or additional isolate`,':',`Virus name(s)`)),
-                          ']'
-                       )
-              END                                    AS lineage,
-              COUNT(*)                              AS ct
-        FROM vmr_export AS vmr
-        GROUP BY vmr.`Virus GENBANK accession`
-        HAVING COUNT(*) > 1
+              v_curr_msl AS msl_release_num,
+              CONCAT(a.accession, ' [',
+                  GROUP_CONCAT(DISTINCT CONCAT(a.species_name, ':', a.isolate_type,
+                      ':', a.isolate_id) ORDER BY a.isolate_id SEPARATOR ' | '),
+                  ']') AS lineage,
+              COUNT(DISTINCT a.isolate_id) AS ct
+        FROM (
+            SELECT DISTINCT si.isolate_id, si.species_name, si.isolate_type,
+                acc.accession
+            FROM species_isolates si
+            JOIN taxonomy_node_names tn ON tn.taxnode_id = si.taxnode_id
+            JOIN JSON_TABLE(
+                CONCAT('["', REGEXP_REPLACE(REGEXP_REPLACE(
+                    UPPER(CONCAT_WS(';', si.genbank_accessions, si.refseq_accessions)),
+                    '\\.[0-9]*', ''), '[^A-Z0-9_]+', '","'), '"]'),
+                '$[*]' COLUMNS (accession VARCHAR(32) PATH '$')
+            ) acc
+            WHERE tn.species <> 'abolished'
+              AND COALESCE(si.update_change, '') <> 'abolished'
+              AND acc.accession REGEXP '^[A-Z]{1,6}_?[0-9]{5,}$'
+        ) a
+        GROUP BY a.accession
+        HAVING COUNT(DISTINCT a.isolate_id) > 1
 
         UNION ALL
 
